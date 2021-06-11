@@ -22,6 +22,7 @@ add_dependencies(unit.real.special.exe  unit.real.special.simd.exe   )
 make_unit("unit.real.special"  beta.cpp                    )
 make_unit("unit.real.special"  betainc.cpp                 )
 make_unit("unit.real.special"  betainc_inv.cpp             )
+make_unit("unit.real.special"  cyl_bessel_j.cpp            )
 make_unit("unit.real.special"  dawson.cpp                  )
 make_unit("unit.real.special"  digamma.cpp                 )
 make_unit("unit.real.special"  erf.cpp                     )
@@ -36,4 +37,18 @@ make_unit("unit.real.special"  lgamma.cpp                  )
 make_unit("unit.real.special"  signgam.cpp                 )
 make_unit("unit.real.special"  stirling.cpp                )
 make_unit("unit.real.special"  tgamma.cpp                  )
-make_unit("unit.real.special"  zeta.cpp                    )
+
+##==================================================================================================
+## Elementwise function unit tests
+##==================================================================================================
+
+make_all_units(ROOT unit.real.special NAME erfc_inv      ARCH scalar simd TYPES ${real_types} )
+make_all_units(ROOT unit.real.special NAME cyl_bessel_j0 ARCH scalar simd TYPES ${real_types} )
+make_all_units(ROOT unit.real.special NAME cyl_bessel_j1 ARCH scalar simd TYPES ${real_types} )
+##make_all_units(ROOT unit.real.special NAME cyl_bessel_j  ARCH scalar simd TYPES ${real_types} )
+make_all_units(ROOT unit.real.special NAME signgam       ARCH scalar simd TYPES ${real_types} )
+make_all_units(ROOT unit.real.special NAME stirling      ARCH scalar simd TYPES ${real_types} )
+make_all_units(ROOT unit.real.special NAME cyl_bessel_y  ARCH scalar simd TYPES ${real_types} )
+make_all_units(ROOT unit.real.special NAME cyl_bessel_y0 ARCH scalar simd TYPES ${real_types} )
+make_all_units(ROOT unit.real.special NAME cyl_bessel_y1 ARCH scalar simd TYPES ${real_types} )
+make_all_units(ROOT unit.real.special NAME zeta          ARCH scalar simd TYPES ${real_types} )
