@@ -10,7 +10,7 @@ using wide_ft = eve::wide<double, eve::fixed<8>>;
 int main()
 {
 
-  wide_ft pd = {0.5, -1.5, 0.1, -1.0, 19.0, 25.0, 21.5, 10000.0};
+  wide_ft pd = {0.5, 3.0, 0.1, -1.0, 19.0, 25.0, 21.5, 10000.0};
   wide_ft n = {0, 1, 2, 3, 0, 1, 2, 3};
 
   std::cout << "---- simd" << '\n'
