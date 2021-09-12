@@ -7,16 +7,11 @@
 //==================================================================================================
 #pragma once
 
-#include <eve/concept/value.hpp>
-#include <eve/function/cyl_bessel_jn.hpp>
+#include <eve/detail/overload.hpp>
 
-namespace eve::detail
+namespace eve
 {
-
-  template<real_value I, floating_real_value T>
-  EVE_FORCEINLINE auto cyl_bessel_j_(EVE_SUPPORTS(cpu_), I nu, T x) noexcept
-  {
-    auto [j, jp, n, np] = cyl_bessel_jn(nu, x);
-    return j;
-  }
+  EVE_MAKE_CALLABLE(cyl_neumann_, cyl_neumann);
 }
+
+#include <eve/module/real/special/function/regular/generic/cyl_neumann.hpp>

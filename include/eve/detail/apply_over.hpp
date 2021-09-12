@@ -86,4 +86,23 @@ namespace eve::detail
     }
     else return f(v);
   }
+
+   template<typename Obj, simd_value T>
+  EVE_FORCEINLINE auto apply_over4(Obj f, T const & v, T const & w)
+  {
+    if constexpr(has_emulated_abi_v<T> ) return map(f, v, w);
+    else if constexpr(has_aggregated_abi_v<T>)
+    {
+      auto  [vlo, vhi] = v.slice();
+      auto  [wlo, whi] = w.slice();
+      auto  [ahi, bhi, chi, dhi] = f(vhi, whi);
+      auto  [alo, blo, clo, dlo] = f(vlo, wlo);
+      return kumi::make_tuple ( eve::combine( alo, ahi)
+                              , eve::combine( blo, bhi)
+                              , eve::combine( clo, chi)
+                              , eve::combine( dlo, dhi)
+                              );
+    }
+    else return f(v, w);
+  }
 }

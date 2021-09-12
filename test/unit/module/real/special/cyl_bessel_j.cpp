@@ -11,7 +11,6 @@
 #include <eve/constant/valmax.hpp>
 #include <eve/function/all.hpp>
 #include <eve/function/cyl_bessel_j.hpp>
-//#include <eve/function/diff/cyl_bessel_j.hpp>
 #include <eve/function/is_negative.hpp>
 #include <eve/function/is_positive.hpp>
 #include <type_traits>
@@ -55,8 +54,7 @@ EVE_TEST( "Check behavior of cyl_bessel_j on wide"
 {
   using v_t = eve::element_type_t<T>;
   auto eve__cyl_bessel_j =  [](auto n, auto x) {
-    auto j = eve::cyl_bessel_j(n, x) ;
-    return kumi::get<0>(j);
+    return eve::cyl_bessel_j(n, x) ;
   };
   auto boost_cyl_bessel_j =  [](v_t n, v_t x) { return std::cyl_bessel_j(n, x); };
   if constexpr( eve::platform::supports_invalids )

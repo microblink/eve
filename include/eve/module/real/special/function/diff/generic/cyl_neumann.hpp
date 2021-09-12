@@ -7,16 +7,19 @@
 //==================================================================================================
 #pragma once
 
-#include <eve/concept/value.hpp>
 #include <eve/function/cyl_bessel_jn.hpp>
+#include <eve/function/derivative.hpp>
 
 namespace eve::detail
 {
 
-  template<real_value I, floating_real_value T>
-  EVE_FORCEINLINE auto cyl_bessel_j_(EVE_SUPPORTS(cpu_), I nu, T x) noexcept
+  template<floating_real_value T, real_value N>
+  EVE_FORCEINLINE constexpr T cyl_neumann_(EVE_SUPPORTS(cpu_)
+                                          , diff_type<1> const &
+                                          , N const &nu
+                                          , T const &x) noexcept
   {
     auto [j, jp, n, np] = cyl_bessel_jn(nu, x);
-    return j;
+    return np;
   }
 }
