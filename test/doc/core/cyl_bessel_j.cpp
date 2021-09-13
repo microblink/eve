@@ -16,6 +16,7 @@ int main()
             << "<- x                      = " << x << '\n'
             << "<- nu                     = " << nu  << '\n'
             << "-> cyl_bessel_j(nu, x)    = " << eve::cyl_bessel_j(nu, x) << '\n'
+            << "-> cyl_bessel_j(nu,-x)    = " << eve::cyl_bessel_j(nu,-x) << '\n'
             << "-> cyl_bessel_j(3, x)     = " << eve::cyl_bessel_j(3, x) << '\n'
             << "-> cyl_bessel_j(nu, 0.1)  = " << eve::cyl_bessel_j(nu, 0.1) << '\n';
 

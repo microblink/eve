@@ -16,6 +16,7 @@ int main()
             << "<- x                            = " << x << '\n'
             << "<- nu                           = " << nu  << '\n'
             << "-> diff(cyl_bessel_j)(nu, x)    = " << eve::diff(cyl_bessel_j)(nu, x) << '\n'
+            << "-> diff(cyl_bessel_j)(nu, -x)   = " << eve::diff(cyl_bessel_j)(nu,-x) << '\n'
             << "-> diff(cyl_bessel_j)(3, x)     = " << eve::diff(cyl_bessel_j)(3, x) << '\n'
             << "-> diff(cyl_bessel_j)(nu, 0.1)  = " << eve::diff(cyl_bessel_j)(nu, 0.1) << '\n';
 

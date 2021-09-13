@@ -16,7 +16,7 @@ namespace eve
   //! @{
   //! @var cyl_bessel_j
   //!
-  //! @brief Callable object computing the bessel regular funcyion of the first  kind:\f$\mbox{J}_\nu(x)\f$,.
+  //! @brief Callable object computing the bessel regular function of the first  kind:\f$\mbox{J}_\nu(x)\f$,.
   //!
   //! **Required header:** `#include <eve/function/cyl_bessel_j.hpp>`
   //!
@@ -52,7 +52,7 @@ namespace eve
   //!
   //!     **Required header:** `#include <eve/function/diff/cyl_bessel_j.hpp>`
   //!
-  //!     The expression `eve::diff(eve::cyl_bessel_j)(x)` computes the derivative of the function at `x`.
+  //!     The expression `eve::diff(eve::cyl_bessel_j)(nu, x)` computes the derivative of the function at `x`.
   //!
   //! ---
   //!

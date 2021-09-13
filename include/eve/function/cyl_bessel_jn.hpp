@@ -39,6 +39,11 @@ namespace eve
   //!
   //!`x`:   [floating real-value](@ref eve::floating_real_value). `x` must be positive.
   //!
+  //!@warning
+  //! On the real field f$\mbox{J}_\nu(x)\f$ is the only bessel function defined for negative inputs and so only if nu is a [flint](@ref eve::is_flint).
+  //! In this case, a direct call to `cyl_bessel_j(nu, x)` will return the expected value i.e. \f$(-1)^nu  \mbox{J}_\nu(-x)\f$, but the first output of
+  //! `cyl_bessel_jn(nu, x)` will be a nan.
+  //!
   //! **Return value**
   //!
   //! Returns [elementwise](@ref glossary_elementwise) a kumi quadruplet consisting of the respective values:

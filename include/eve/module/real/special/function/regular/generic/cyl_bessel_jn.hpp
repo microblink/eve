@@ -54,15 +54,15 @@ namespace eve::detail
       {
         if (is_eqz(nu))
         {
-          return kumi::make_tuple(T(1), T(0), inf(as(x)), inf(as(x))); //jnu, jpnu, nnu, npnu
+          return kumi::make_tuple(T(1), T(0), minf(as(x)), inf(as(x))); //jnu, jpnu, nnu, npnu
         }
         else if (nu ==one(as(x)))
         {
-          return kumi::make_tuple(T(0), T(0.5), inf(as(x)), inf(as(x))); //jnu, jpnu, nnu, npnu
+          return kumi::make_tuple(T(0), T(0.5), minf(as(x)), inf(as(x))); //jnu, jpnu, nnu, npnu
         }
         else
         {
-          return kumi::make_tuple(T(0), T(0), inf(as(x)), inf(as(x))); //jnu, jpnu, nnu, npnu
+          return kumi::make_tuple(T(0), T(0), minf(as(x)), inf(as(x))); //jnu, jpnu, nnu, npnu
         }
       }
       const T Eps = eve::eps(as(x));
@@ -452,7 +452,7 @@ namespace eve::detail
                              )
                      , jpnu
                      );
-        nmu = if_else(iseqzx, inf(as(x)), nmu);
+        nmu = if_else(iseqzx, minf(as(x)), nmu);
         nnu1= if_else(iseqzx, inf(as(x)), nnu1);
       }
       return kumi::make_tuple(jnu, jpnu, nnu, npnu);
