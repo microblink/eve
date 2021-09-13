@@ -27,6 +27,7 @@
 #include <eve/function/fam.hpp>
 #include <eve/function/fma.hpp>
 #include <eve/function/is_eqz.hpp>
+#include <eve/function/is_gez.hpp>
 #include <eve/function/log.hpp>
 #include <eve/function/rec.hpp>
 #include <eve/function/sinpic.hpp>
@@ -42,15 +43,16 @@ namespace eve::detail
 {
 
   template<real_scalar_value I, floating_real_scalar_value T>
-  EVE_FORCEINLINE auto cyl_bessel_jn_(EVE_SUPPORTS(cpu_), I n, T x) noexcept
+  EVE_FORCEINLINE auto cyl_bessel_jy_(EVE_SUPPORTS(cpu_), I n, T x) noexcept
   {
-    if constexpr(std::is_integral_v<I>) return cyl_bessel_jn(T(n), x);
+    if constexpr(std::is_integral_v<I>) return cyl_bessel_jy(T(n), x);
     else
     {
       T nu(n);
       T jnu, jpnu, nnu, npnu;
-
-      if (is_eqz(x))
+      if (x == inf(as(x))) return kumi::make_tuple(T(0), nan(as(x)), T(0), nan(as(x)));
+      else if (is_ltz(x)) return kumi::make_tuple(nan(as(x)),  nan(as(x)),  nan(as(x)), nan(as(x)));
+      else if (is_eqz(x))
       {
         if (is_eqz(nu))
         {
@@ -88,19 +90,22 @@ namespace eve::detail
       T b = xi2 * nu;
       T d = T(0);
       T c = h;
-      int i;
-      for (i = 1; i <= max_iter; ++i)
       {
-        b += xi2;
-        d = b - d;
-        if (eve::abs(d) < fp_min) d = fp_min;
-        c = b - T(1) / c;
-        if (eve::abs(c) < fp_min) c = fp_min;
-        d = T(1) / d;
-        const T del = c * d;
-        h *= del;
-        if (d < T(0))  isign = -isign;
-        if (eve::abs(del - T(1)) < Eps) break;
+        int i;
+        for (i = 1; i <= max_iter; ++i)
+        {
+          b += xi2;
+          d = b - d;
+          if (eve::abs(d) < fp_min) d = fp_min;
+          c = b - T(1) / c;
+          if (eve::abs(c) < fp_min) c = fp_min;
+          d = T(1) / d;
+          const T del = c * d;
+          h *= del;
+          if (d < T(0))  isign = -isign;
+          if (eve::abs(del - T(1)) < Eps) break;
+        }
+        if (i > max_iter) return kumi::make_tuple(nan(as(x)), nan(as(x)), nan(as(x)), nan(as(x)));
       }
       T jnul = isign * fp_min;
       T jpnul = h * jnul;
@@ -149,20 +154,22 @@ namespace eve::detail
         d = -x2 * x2;
         T sum = ff + r * q;
         T sum1 = p;
-        for (i = 1; i <= max_iter; ++i)
         {
-          ff = (i * ff + p + q) / (i * i - mu2);
-          c *= d / T(i);
-          p /= T(i) - mu;
-          q /= T(i) + mu;
-          const T del = c * (ff + r * q);
-          sum += del;
-          const T del1 = c * p - i * del;
-          sum1 += del1;
-          if ( eve::abs(del) < Eps*(T(1) + eve::abs(sum)) )
-            break;
-        }
-        nmu = -sum;
+          int i;
+          for (i = 1; i <= max_iter; ++i)
+          {
+            ff = (i * ff + p + q) / (i * i - mu2);
+            c *= d / T(i);
+            p /= T(i) - mu;
+            q /= T(i) + mu;
+            const T del = c * (ff + r * q);
+            sum += del;
+            const T del1 = c * p - i * del;
+            sum1 += del1;
+            if ( eve::abs(del) < Eps*(T(1) + eve::abs(sum)) )
+              break;
+          }
+        }        nmu = -sum;
         nnu1 = -sum1 * xi2;
         npmu = mu * xi * nmu - nnu1;
         jmu = w / (npmu - f * nmu);
@@ -185,27 +192,30 @@ namespace eve::detail
         T temp = p * dlr - q * dli;
         q = p * dli + q * dlr;
         p = temp;
-        int i;
-        for (i = 2; i <= max_iter; ++i)
         {
-          a += T(2 * (i - 1));
-          bi += T(2);
-          dr = a * dr + br;
-          di = a * di + bi;
-          if (eve::abs(dr) + eve::abs(di) < fp_min) dr = fp_min;
-          fact = a / (cr * cr + ci * ci);
-          cr = br + cr * fact;
-          ci = bi - ci * fact;
-          if (eve::abs(cr) + eve::abs(ci) < fp_min) cr = fp_min;
-          den = dr * dr + di * di;
-          dr /= den;
-          di /= -den;
-          dlr = cr * dr - ci * di;
-          dli = cr * di + ci * dr;
-          temp = p * dlr - q * dli;
-          q = p * dli + q * dlr;
-          p = temp;
-          if (eve::abs(dlr - T(1)) + eve::abs(dli) < Eps)  break;
+          int i;
+          for (i = 2; i <= max_iter; ++i)
+          {
+            a += T(2 * (i - 1));
+            bi += T(2);
+            dr = a * dr + br;
+            di = a * di + bi;
+            if (eve::abs(dr) + eve::abs(di) < fp_min) dr = fp_min;
+            fact = a / (cr * cr + ci * ci);
+            cr = br + cr * fact;
+            ci = bi - ci * fact;
+            if (eve::abs(cr) + eve::abs(ci) < fp_min) cr = fp_min;
+            den = dr * dr + di * di;
+            dr /= den;
+            di /= -den;
+            dlr = cr * dr - ci * di;
+            dli = cr * di + ci * dr;
+            temp = p * dlr - q * dli;
+            q = p * dli + q * dlr;
+            p = temp;
+            if (eve::abs(dlr - T(1)) + eve::abs(dli) < Eps)  break;
+          }
+          if (i > max_iter) return  kumi::make_tuple(nan(as(x)), nan(as(x)), nan(as(x)), nan(as(x)));
         }
         const T gam = (p - f) / q;
         jmu = eve::sqrt(w / ((p - f) * gam + q));
@@ -217,7 +227,7 @@ namespace eve::detail
       fact = jmu / jnul;
       jnu = fact * jnul1;
       jpnu = fact * jpnu1;
-      for (i = 1; i <= nl; ++i)
+      for (int i = 1; i <= nl; ++i)
       {
         const T nnutemp = (mu + i) * xi2 * nnu1 - nmu;
         nmu = nnu1;
@@ -230,30 +240,32 @@ namespace eve::detail
   }
 
   template<real_scalar_value I, floating_real_simd_value T>
-  EVE_FORCEINLINE auto cyl_bessel_jn_(EVE_SUPPORTS(cpu_), I nu, T x) noexcept
+  EVE_FORCEINLINE auto cyl_bessel_jy_(EVE_SUPPORTS(cpu_), I nu, T x) noexcept
   {
-    return cyl_bessel_jn(T(nu), x);
+    return cyl_bessel_jy(T(nu), x);
   }
 
   template<real_simd_value I, floating_real_simd_value T>
-  EVE_FORCEINLINE auto cyl_bessel_jn_(EVE_SUPPORTS(cpu_), I nu, T x) noexcept
+  EVE_FORCEINLINE auto cyl_bessel_jy_(EVE_SUPPORTS(cpu_), I nu, T x) noexcept
   {
-    return cyl_bessel_jn(convert(nu, as(element_type_t<T>())), x);
+    return cyl_bessel_jy(convert(nu, as(element_type_t<T>())), x);
   }
 
   template<real_simd_value I, floating_real_scalar_value T>
-  EVE_FORCEINLINE auto cyl_bessel_jn_(EVE_SUPPORTS(cpu_), I nu, T x) noexcept
+  EVE_FORCEINLINE auto cyl_bessel_jy_(EVE_SUPPORTS(cpu_), I nu, T x) noexcept
   {
     using c_t = wide <T, cardinal_t<I>>;
-    return cyl_bessel_jn(convert(nu, as(x)), c_t(x));
+    return cyl_bessel_jy(convert(nu, as(x)), c_t(x));
   }
 
   template<floating_real_simd_value T>
-  EVE_FORCEINLINE auto cyl_bessel_jn_(EVE_SUPPORTS(cpu_), T nu, T x) noexcept
+  EVE_FORCEINLINE auto cyl_bessel_jy_(EVE_SUPPORTS(cpu_), T nu, T x) noexcept
   {
     if constexpr(has_native_abi_v<T>)
     {
       auto iseqzx = is_eqz(x);
+      auto isltzx = is_ltz(x);
+      x = if_else(isltzx, zero, x);
       T jnu, jpnu, nnu, npnu;
       const T Eps = eve::eps(as(x));
       const T fp_min = eve::sqrt(smallestposval(as(x)));
@@ -271,18 +283,24 @@ namespace eve::detail
       T b = xi2 * nu;
       T d(T(0));
       T c = h;
-      for (int i = 1; i <= max_iter; ++i)
       {
-        b += xi2;
-        d = b - d;
-        d = if_else(eve::abs(d) < fp_min, fp_min, d);
-        c = b - rec(c);
-        c = if_else(eve::abs(c) < fp_min, fp_min, c);
-        d = rec(d);
-        const T del = c * d;
-        h *= del;
-        isign = if_else(is_ltz(d), -isign, isign);
-        if (eve::all(eve::abs(del - T(1)) < Eps)) break;
+        int i;
+        auto test(false_(as(Eps)));
+        for ( i = 1; i <= max_iter; ++i)
+        {
+          b += xi2;
+          d = b - d;
+          d = if_else(eve::abs(d) < fp_min, fp_min, d);
+          c = b - rec(c);
+          c = if_else(eve::abs(c) < fp_min, fp_min, c);
+          d = rec(d);
+          const T del = c * d;
+          h *= del;
+          isign = if_else(is_ltz(d), -isign, isign);
+          test = eve::abs(del - T(1)) < Eps;
+          if (eve::all(test)) break;
+        }
+        if(i == max_iter) h = if_else(test, h, nan(as(h)));
       }
       T jnul = isign * fp_min;
       T jpnul = h * jnul;
@@ -331,20 +349,28 @@ namespace eve::detail
         d = -x2 * x2;
         T sum = ff + r * q;
         T sum1 = p;
-        int i;
-        for (i = 1; i <= max_iter; ++i)
         {
-          ff = (i * ff + p + q) / (i * i - mu2);
-          c *= d / T(i);
-          p /= T(i) - mu;
-          q /= T(i) + mu;
-          const T del = c * (ff + r * q);
-          sum += del;
-          const T del1 = c * p - i * del;
-          sum1 += del1;
-          auto test = eve::abs(del) < Eps * (T(1) + eve::abs(sum));
-          if ( eve::all(test) ) break;
+          int i;
+          for (i = 1; i <= max_iter; ++i)
+          {
+            ff = (i * ff + p + q) / (i * i - mu2);
+            c *= d / T(i);
+            p /= T(i) - mu;
+            q /= T(i) + mu;
+            const T del = c * (ff + r * q);
+            sum += del;
+            const T del1 = c * p - i * del;
+            sum1 += del1;
+            auto test = eve::abs(del) < Eps * (T(1) + eve::abs(sum));
+            if ( eve::all(test) ) break;
+          }
+          if(i == max_iter)
+          {
+            sum = if_else(test, sum, nan(as(sum)));
+            sum1= if_else(test, sum1, nan(as(sum)));
+          }
         }
+
         nmu = -sum;
         nnu1 = -sum1 * xi2;
         npmu = mu * xi * nmu - nnu1;
@@ -455,8 +481,15 @@ namespace eve::detail
         nmu = if_else(iseqzx, minf(as(x)), nmu);
         nnu1= if_else(iseqzx, inf(as(x)), nnu1);
       }
+      if (eve::any(isltzx))
+      {
+        jnu = if_else(isltzx, jnu, allbits);
+        jpnu = if_else(isltzx, jpnu, allbits);
+        nnu = if_else(isltzx, nnu, allbits);
+        npnu = if_else(isltzx, npnu, allbits);
+      }
       return kumi::make_tuple(jnu, jpnu, nnu, npnu);
     }
-    else return apply_over4(cyl_bessel_jn, nu, x);
+    else return apply_over4(cyl_bessel_jy, nu, x);
   }
 }
