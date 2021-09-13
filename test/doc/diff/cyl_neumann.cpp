@@ -1,4 +1,4 @@
-#include <eve/function/diff/cyl_bessel_j.hpp>
+#include <eve/function/diff/cyl_neumann.hpp>
 #include <eve/wide.hpp>
 #include <eve/constant/inf.hpp>
 #include <eve/constant/minf.hpp>
@@ -15,11 +15,11 @@ int main()
   std::cout << "---- simd" << '\n'
             << "<- x                            = " << x << '\n'
             << "<- nu                           = " << nu  << '\n'
-            << "-> diff(cyl_bessel_j)(nu, x)    = " << eve::diff(cyl_bessel_j)(nu, x) << '\n'
-            << "-> diff(cyl_bessel_j)(3, x)     = " << eve::diff(cyl_bessel_j)(3, x) << '\n'
-            << "-> diff(cyl_bessel_j)(nu, 0.1)  = " << eve::diff(cyl_bessel_j)(nu, 0.1) << '\n';
+            << "-> diff(cyl_neumann)(nu, x)     = " << eve::diff(cyl_neumann)(nu, x) << '\n'
+            << "-> diff(cyl_neumann)(3, x)      = " << eve::diff(cyl_neumann)(3, x) << '\n'
+            << "-> diff(cyl_neumann)(nu, 0.1)   = " << eve::diff(cyl_neumann)(nu, 0.1) << '\n';
 
   std::cout << "---- scalar" << '\n'
-            << "-> diff(cyl_bessel_j)(1.0, 3.0) = " << eve::diff(cyl_bessel_j)(1.0, 3.0) << '\n';
+            << "-> diff(cyl_neumann)(1.0, 3.0)  = " << eve::diff(cyl_neumann)(1.0, 3.0) << '\n';
   return 0;
 }

@@ -11,6 +11,50 @@
 
 namespace eve
 {
+  //================================================================================================
+  //! @addtogroup special
+  //! @{
+  //! @var cyl_bessel_jn
+  //!
+  //! @brief Callable object computing the bessel regular funcyion of the first and second kind:\f$\mbox{J}_\nu(x)\f$, \f$\mbox{N}_\nu(x)\f$,
+  //! and their first order derivatives.
+  //!
+  //! **Required header:** `#include <eve/function/cyl_bessel_jn.hpp>`
+  //!
+  //! #### Members Functions
+  //!
+  //! | Member       | Effect                                                     |
+  //! |:-------------|:-----------------------------------------------------------|
+  //! | `operator()` | the cyl_bessel_jn operation                                |
+  //!
+  //! ---
+  //!
+  //!  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+  //!  auto operator()( real_value auto nu, floating_real_value auto x ) const noexcept
+  //!  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  //!
+  //! **Parameters**
+  //!
+  //!`nu`:   [real value](@ref eve::real_value).
+  //!
+  //!`x`:   [floating real-value](@ref eve::floating_real_value). `x` must be positive.
+  //!
+  //! **Return value**
+  //!
+  //! Returns [elementwise](@ref glossary_elementwise) a kumi quadruplet consisting of the respective values:
+  //! \f$\mbox{J}_\nu(x)\f$, \f$\mbox{J}_\nu'(x)\f$, \f$\mbox{N}_\nu(x)\f$, \f$\mbox{N}_\nu'(x)\f$.
+  //!
+  //! With \f$\displaystyle \mbox{J}_\nu(x) = \left(\frac{z}2\right)^\nu \sum_{k = 0}^\infty \frac{(-z^2/4)^k}{k!\Gamma(\nu+k+1)}\f$
+  //!  and \f$\displaystyle \mbox{N}_\nu(x) = \frac{\mbox{J}_\nu(x)\cos(\pi x)-\mbox{J}_{-\nu(x)}}{sin(\nu\pi}\f$.
+  //!
+  //! ---
+  //!
+  //! #### Example
+  //!
+  //! @godbolt{doc/core/cyl_bessel_jn.cpp}
+  //!
+  //!  @}
+  //================================================================================================
   EVE_MAKE_CALLABLE(cyl_bessel_jn_, cyl_bessel_jn);
 }
 

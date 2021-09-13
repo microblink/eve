@@ -9,24 +9,17 @@ using wide_ft = eve::wide<double, eve::fixed<8>>;
 
 int main()
 {
-
-  wide_ft pd = {0.5, 3.0, 0.1, -1.0, 19.0, 25.0, 21.5, 10000.0};
-  wide_ft n = {0, 1, 2, 3, 0, 1, 2, 3};
+  wide_ft x  = {0.5, 0.0, 0.1, 1.0, 3.0, 0.5, 21.5, 10.0};
+  wide_ft nu = {0.0, 1.0, 2.0, 3.0, 0.5, 1.5,  2.5,  3.5};
 
   std::cout << "---- simd" << '\n'
-            << "<- pd                    = " << pd << '\n'
-            << "<- n                     = " << n  << '\n'
-            << "-> cyl_bessel_j(n, pd)   = " << eve::cyl_bessel_j(n, pd) << '\n'
-            << "-> cyl_bessel_j(3, pd)   = " << eve::cyl_bessel_j(3, pd) << '\n'
-            << "-> cyl_bessel_j(n, 0.1)  = " << eve::cyl_bessel_j(n, 0.1) << '\n';
-
-
-  double xd = 3.0;
+            << "<- x                      = " << x << '\n'
+            << "<- nu                     = " << nu  << '\n'
+            << "-> cyl_bessel_j(nu, x)    = " << eve::cyl_bessel_j(nu, x) << '\n'
+            << "-> cyl_bessel_j(3, x)     = " << eve::cyl_bessel_j(3, x) << '\n'
+            << "-> cyl_bessel_j(nu, 0.1)  = " << eve::cyl_bessel_j(nu, 0.1) << '\n';
 
   std::cout << "---- scalar" << '\n'
-            << "<- xd                    = " << xd << '\n'
-            << "-> cyl_bessel_j(1.0, xd) = " << eve::cyl_bessel_j(1.0, xd) << '\n';
-
-
+            << "-> cyl_bessel_j(1.0, 3.0) = " << eve::cyl_bessel_j(1.0, 3.0) << '\n';
   return 0;
 }

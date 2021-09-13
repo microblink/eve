@@ -8,21 +8,6 @@
 #pragma once
 
 #include <eve/concept/value.hpp>
-// #include <eve/function/fms.hpp>
-// #include <eve/function/abs.hpp>
-// #include <eve/function/any.hpp>
-// #include <eve/function/cospi.hpp>
-// #include <eve/detail/hz_device.hpp>
-// #include <eve/function/fms.hpp>
-// #include <eve/function/fnma.hpp>
-// #include <eve/function/if_else.hpp>
-// #include <eve/function/is_ltz.hpp>
-// #include <eve/function/is_nltz.hpp>
-// #include <eve/function/is_nlez.hpp>
-// #include <eve/function/is_flint.hpp>
-// #include <eve/function/is_odd.hpp>
-// #include <eve/constant/true.hpp>
-// #include <type_traits>
 
 #include <eve/constant/eps.hpp>
 #include <eve/constant/inf.hpp>
@@ -34,6 +19,8 @@
 #include <eve/function/abs.hpp>
 #include <eve/function/any.hpp>
 #include <eve/function/all.hpp>
+#include <eve/function/min.hpp>
+#include <eve/function/max.hpp>
 #include <eve/function/none.hpp>
 #include <eve/function/average.hpp>
 #include <eve/function/copysign.hpp>
