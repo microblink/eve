@@ -18,6 +18,15 @@ namespace eve
     template<typename D> static constexpr auto combine( D const& ) noexcept =delete;
   };
 
+  struct saturated2_ : decorator_
+  {
+    template<typename Caller>
+    constexpr EVE_FORCEINLINE auto operator()(Caller f) const noexcept
+    {
+      return typename detail::decorate<typename Caller::tag_type,saturated2_>::type{};
+    }
+  };
+
   using saturated_type = decorated<saturated_()>;
 
   //================================================================================================
@@ -66,4 +75,5 @@ namespace eve
   //!  @}
   //================================================================================================
   inline constexpr saturated_type const saturated = {};
+  inline constexpr saturated2_    const saturated2 = {};
 }

@@ -7,7 +7,7 @@
 //==================================================================================================
 #pragma once
 
-#include <eve/detail/overload.hpp>
+#include <eve/detail/overload2.hpp>
 
 namespace eve
 {
@@ -86,7 +86,32 @@ namespace eve
   //!
   //!  @}
   //================================================================================================
-  EVE_MAKE_CALLABLE(add_, add);
+  namespace tag { struct add_ {}; }
+
+  namespace detail
+  {
+    struct callable_add_  : make_callable<tag::add_   , callable_add_>
+                          , make_conditional<tag::add_, callable_add_>
+    {
+      static constexpr auto name = "add";
+
+      template<value T0, value... Tn>
+      requires (compatible_values<T0, Tn> && ...)
+      static EVE_FORCEINLINE constexpr auto call(T0 a0, Tn... an) noexcept
+      {
+        return add_(EVE_DISPATCH(), a0, an...);
+      }
+
+      template<conditional_expr C, value T0, value... Tn>
+      requires (compatible_values<T0, Tn> && ...)
+      static EVE_FORCEINLINE constexpr auto conditional_call(C const& c, T0 a0, Tn... an) noexcept
+      {
+        return add_(EVE_DISPATCH(), c, a0, an...);
+      }
+    };
+  }
+
+  EVE_MAKE_CALLABLE2(add_, add);
 }
 
 #include <eve/module/real/core/function/regular/generic/add.hpp>

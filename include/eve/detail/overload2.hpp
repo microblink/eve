@@ -13,31 +13,27 @@ namespace eve::detail
 {
   template<typename Tag, typename Caller> struct make_callable
   {
-    using tag_type    = Tag;
-
-    template<conditional_expr C, typename... Args>
-    EVE_FORCEINLINE constexpr auto operator()(C&& c, Args &&... args) const noexcept
+    friend std::ostream& operator<<(std::ostream& os, make_callable const&)
     {
-      if constexpr( tag_dispatchable<tag_type,C,Args...> )
-      {
-        return tagged_dispatch(tag_type{}, std::forward<C>(c), std::forward<Args>(args)...);
-      }
-      else
-      {
-        return Caller::conditional_call(std::forward<C>(c), std::forward<Args>(args)...);
-      }
+      return os << Caller::name;
     }
 
-    template<typename... Args>
-    EVE_FORCEINLINE constexpr auto operator()(Args &&... args) const noexcept
+    using tag_type    = Tag;
+
+    template<typename A0, typename... Args>
+    EVE_FORCEINLINE constexpr auto operator()(A0&& a0, Args &&... args) const noexcept
     {
-      if constexpr( tag_dispatchable<tag_type,Args...> )
+      if constexpr( tag_dispatchable<tag_type,A0,Args...> )
       {
-        return tagged_dispatch(tag_type{}, std::forward<Args>(args)...);
+        return tagged_dispatch(tag_type{}, std::forward<A0>(a0), std::forward<Args>(args)...);
+      }
+      else if constexpr( conditional_expr<std::remove_cvref_t<A0>> )
+      {
+        return Caller::conditional_call(std::forward<A0>(a0), std::forward<Args>(args)...);
       }
       else
       {
-        return Caller::call(std::forward<Args>(args)...);
+        return Caller::call(std::forward<A0>(a0), std::forward<Args>(args)...);
       }
     }
   };
@@ -72,59 +68,26 @@ inline std::ostream& operator<<(std::ostream& os, detail::callable_##TAG const&)
 inline detail::callable_##TAG const NAME = {}                                                      \
 /**/
 
-/*
-namespace eve
+namespace eve::detail
 {
   //================================================================================================
-  // decorator definition, detection, combination and application to callables
+  // decorator definition & application to callables
   //================================================================================================
-  struct decorator_ {};
-  template<typename ID> concept decorator = std::derived_from<ID,decorator_>;
-
-  template<typename Decoration> struct decorated;
-  template<typename Decoration, typename... Args>
-  struct decorated<Decoration(Args...)> : decorator_
+  template<typename Caller, typename Decorator> struct decorate
   {
-    using base_type = Decoration;
-
-    template<decorator Decorator>
-    constexpr EVE_FORCEINLINE auto operator()(Decorator d) const noexcept
-    {
-      return Decoration::combine(d);
-    }
-
-    template <typename Function>
-    struct fwding_lamda
-    {
-      Function f;
-
-      template <typename... X>
-      constexpr EVE_FORCEINLINE auto operator()(X&&... x)
-      {
-        return f(decorated{}, std::forward<X>(x)...);
-      }
-    };
-
-    template<typename Function>
-    constexpr EVE_FORCEINLINE auto operator()(Function f) const noexcept
-    {
-      if constexpr( requires{ Decoration{}(f); } )  return Decoration{}(f);
-      else                                          return fwding_lamda<Function>{f};
-    }
+    using type = Caller;
   };
 
-  namespace detail
-  {
-    template<typename C> struct if_;
+/*
+  struct decorator_ {};
+  template<typename ID> concept decorator = std::derived_from<ID,decorator_>;
+*/
 
+  template<typename C> struct if_;
+/*
     //==============================================================================================
     // basic type to support delayed calls
     struct delay_t {};
-
-    //==============================================================================================
-    // Extension point for centralizing asserts & static_asserts
-    template<typename Tag, typename... Args>
-    void check(delay_t const&, Tag const&, Args const&... ) {}
 
     //==============================================================================================
     // User-facing tag-dispatch helper
@@ -133,6 +96,5 @@ namespace eve
     {
       { tagged_dispatch(tag, std::forward<Args>(args)...) };
     };
-  }
-}
 */
+}
