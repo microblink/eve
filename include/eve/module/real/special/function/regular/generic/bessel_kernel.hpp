@@ -44,13 +44,14 @@ namespace eve::detail
 {
 
   template<real_scalar_value I, floating_real_scalar_value T>
-  EVE_FORCEINLINE auto cyl_bessel_jy_(EVE_SUPPORTS(cpu_), I n, T x) noexcept
+  EVE_FORCEINLINE auto kernel_jy_(I n, T x) noexcept
   {
-    if constexpr(std::is_integral_v<I>) return cyl_bessel_jy(T(n), x);
+    //std::cout << (x *x < 10 * (nu + 1)) << std::endl;
+
+    if constexpr(std::is_integral_v<I>) return kernel_jy(T(n), x);
     else
     {
       T nu(n);
-      std::cout << (x *x < 10 * (nu + 1)) << std::endl;
       T jnu, jpnu, nnu, npnu;
       if (x == inf(as(x))) return kumi::make_tuple(T(0), nan(as(x)), T(0), nan(as(x)));
       else if (is_ltz(x)) return kumi::make_tuple(nan(as(x)),  nan(as(x)),  nan(as(x)), nan(as(x)));
@@ -242,26 +243,26 @@ namespace eve::detail
   }
 
   template<real_scalar_value I, floating_real_simd_value T>
-  EVE_FORCEINLINE auto cyl_bessel_jy_(EVE_SUPPORTS(cpu_), I nu, T x) noexcept
+  EVE_FORCEINLINE auto kernel_jy_(I nu, T x) noexcept
   {
-    return cyl_bessel_jy(T(nu), x);
+    return kernel_jy(T(nu), x);
   }
 
   template<real_simd_value I, floating_real_simd_value T>
-  EVE_FORCEINLINE auto cyl_bessel_jy_(EVE_SUPPORTS(cpu_), I nu, T x) noexcept
+  EVE_FORCEINLINE auto kernel_jy_(I nu, T x) noexcept
   {
-    return cyl_bessel_jy(convert(nu, as(element_type_t<T>())), x);
+    return kernel_jy(convert(nu, as(element_type_t<T>())), x);
   }
 
   template<real_simd_value I, floating_real_scalar_value T>
-  EVE_FORCEINLINE auto cyl_bessel_jy_(EVE_SUPPORTS(cpu_), I nu, T x) noexcept
+  EVE_FORCEINLINE auto kernel_jy_(I nu, T x) noexcept
   {
     using c_t = wide <T, cardinal_t<I>>;
-    return cyl_bessel_jy(convert(nu, as(x)), c_t(x));
+    return kernel_jy(convert(nu, as(x)), c_t(x));
   }
 
   template<floating_real_simd_value T>
-  EVE_FORCEINLINE auto cyl_bessel_jy_(EVE_SUPPORTS(cpu_), T nu, T x) noexcept
+  EVE_FORCEINLINE auto kernel_jy_(T nu, T x) noexcept
   {
     if constexpr(has_native_abi_v<T>)
     {
@@ -492,6 +493,67 @@ namespace eve::detail
       }
       return kumi::make_tuple(jnu, jpnu, nnu, npnu);
     }
-    else return apply_over4(cyl_bessel_jy, nu, x);
+    else return apply_over4(kernel_jy, nu, x);
+  }
+
+  /////////////////////////////////////////////////////////////////////////
+  // implementation with series
+  //   @brief This routine returns the cylindrical Bessel functions
+  //          of order \f$ \nu \f$: \f$ J_{\nu} \f$ or \f$ I_{\nu} \f$
+  //          by series expansion.
+  //   The modified cylindrical Bessel function is:
+  //   @f[
+  //    Z_{\nu}(x) = \sum_{k=0}^{\infty}
+  //              \frac{\sigma^k (x/2)^{\nu + 2k}}{k!\Gamma(\nu+k+1)}
+  //   @f]
+  //   where \f$ \sigma = +1 \f$ or\f$  -1 \f$ for
+  //   \f$ Z = I \f$ or \f$ J \f$ respectively.
+  *
+  //   See Abramowitz & Stegun, 9.1.10
+  //       Abramowitz & Stegun, 9.6.7
+  //    (1) Handbook of Mathematical Functions,
+  //        ed. Milton Abramowitz and Irene A. Stegun,
+  //        Dover Publications,
+  //        Equation 9.1.10 p. 360 and Equation 9.6.10 p. 375
+  *
+  //   @param  __nu  The order of the Bessel function.
+  //   @param  __x   The argument of the Bessel function.
+  //   @param  __sgn  The sign of the alternate terms
+  //                  -1 for the Bessel function of the first kind.
+  //                  +1 for the modified Bessel function of the first kind.
+  //   @return  The output Bessel function.
+  /////////////////////////////////////////////////////////////////////////////////
+
+  template<integral_value I, floating_real_value T>
+  auto cyl_bessel_ij_series(I nu, T x, element_type_t<T> sgn, unsigned int max_iter)
+  {
+    return kernel_ij_series(convert(nu, as(element_type_t<T>)), x);
+  }
+
+  template<floating_real_value T>
+  auto kernel_ij_series(I nu, T x, element_type_t<T> sgn, unsigned int max_iter)
+  {
+    if constexpr(has_native_abi_v<T>)
+    {
+      if constexpr(real_scalar_value<T>) if (x == T(0)) return nu == T(0) ? T(1) : T(0);
+      const T x2 = x / T(2);
+      T fact = nu * eve::log(x2);
+      fact -= eve::lgamma(inc(nu));
+      fact = eve::exp(fact);
+      const T xx4 = sgn * sqr(x2);
+      T jn = T(1);
+      T term = T(1);
+      for (unsigned int i = 1; i < max_iter; ++i)
+      {
+        term *= xx4 / (T(i) * (nu + T(i)));
+        jn += term;
+        if (eve::abs(term / jn) < eps(as(x))  break;
+            }
+        auto r = fact * jn;
+        if   constexpr(real_scalar_value<T>) return r;
+        else return if_else(is_eqz(x), if_else(is_eqz(nu), zero, one(as(x))), r);
+      }
+    }
+    else return apply_over(cyl_bessel_ij_series, nu, x);
   }
 }

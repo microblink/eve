@@ -50,7 +50,7 @@ EVE_TEST( "Check behavior of cyl_bessel_j on wide"
         , eve::test::generate(eve::test::randoms(0.0, 10.0),
                               eve::test::ramp(0))
         )
-<typename T>(T const& a0, T const & n)
+<typename T>(T  a0, T const & n)
 {
   using v_t = eve::element_type_t<T>;
   auto eve__cyl_bessel_j =  [](auto n, auto x) {
@@ -90,10 +90,29 @@ EVE_TEST( "Check behavior of cyl_bessel_j on wide"
 //        TTS_ULP_EQUAL(eve__cyl_bessel_j(T(1), T(3)), T(boost_cyl_bessel_j(1.0, 3.0)), 10);
 //        TTS_ULP_EQUAL(eve__cyl_bessel_j(T(2), T(3)), T(boost_cyl_bessel_j(2.0, 3.0)), 10);
 
-//   TTS_ULP_EQUAL(eve__cyl_bessel_j(T(0), a0), map(boost_cyl_bessel_j, T(0), a0), 10);
-//   TTS_ULP_EQUAL(eve__cyl_bessel_j(T(1), a0), map(boost_cyl_bessel_j, T(1), a0), 10);
-//   TTS_ULP_EQUAL(eve__cyl_bessel_j(T(2), a0), map(boost_cyl_bessel_j, T(2), a0), 10);
-//   TTS_ULP_EQUAL(eve__cyl_bessel_j(T(0.5), a0), map(boost_cyl_bessel_j, T(0.5), a0), 10);
-  TTS_ULP_EQUAL(eve__cyl_bessel_j(n     , a0), map(boost_cyl_bessel_j, n,    a0), 100);
+  a0/= 100;
+  TTS_ULP_EQUAL(eve__cyl_bessel_j(T(0), a0), map(boost_cyl_bessel_j, T(0), a0), 30);
+  TTS_ULP_EQUAL(eve__cyl_bessel_j(T(1), a0), map(boost_cyl_bessel_j, T(1), a0), 30);
+  TTS_ULP_EQUAL(eve__cyl_bessel_j(T(2), a0), map(boost_cyl_bessel_j, T(2), a0), 30);
+  TTS_ULP_EQUAL(eve__cyl_bessel_j(T(0.5), a0), map(boost_cyl_bessel_j, T(0.5), a0), 30);
+  TTS_ULP_EQUAL(eve__cyl_bessel_j(n, a0), map(boost_cyl_bessel_j, n, a0), 30);
+  a0+= 500;
+  TTS_ULP_EQUAL(eve__cyl_bessel_j(T(0), a0), map(boost_cyl_bessel_j, T(0), a0), 30);
+  TTS_ULP_EQUAL(eve__cyl_bessel_j(T(1), a0), map(boost_cyl_bessel_j, T(1), a0), 30);
+  TTS_ULP_EQUAL(eve__cyl_bessel_j(T(2), a0), map(boost_cyl_bessel_j, T(2), a0), 30);
+  TTS_ULP_EQUAL(eve__cyl_bessel_j(T(0.5), a0), map(boost_cyl_bessel_j, T(0.5), a0), 30);
+  TTS_ULP_EQUAL(eve__cyl_bessel_j(n, a0), map(boost_cyl_bessel_j, n, a0), 30);
+  a0+= 15000;
+  TTS_ULP_EQUAL(eve__cyl_bessel_j(T(0), a0), map(boost_cyl_bessel_j, T(0), a0), 30);
+  TTS_ULP_EQUAL(eve__cyl_bessel_j(T(1), a0), map(boost_cyl_bessel_j, T(1), a0), 30);
+  TTS_ULP_EQUAL(eve__cyl_bessel_j(T(2), a0), map(boost_cyl_bessel_j, T(2), a0), 30);
+  TTS_ULP_EQUAL(eve__cyl_bessel_j(T(0.5), a0), map(boost_cyl_bessel_j, T(0.5), a0), 30);
+  TTS_ULP_EQUAL(eve__cyl_bessel_j(n, a0), map(boost_cyl_bessel_j, n, a0), 30);
+
+//   auto z = eve__cyl_bessel_j(n     , a0);
+//   auto z1= map(boost_cyl_bessel_j, n,    a0);
+//   TTS_ULP_EQUAL(z, z1, 100);
+//   TTS_ULP_EQUAL(eve__cyl_bessel_j(n     , a0),
+//                 map(boost_cyl_bessel_j, n,    a0), 100);
 
 };
