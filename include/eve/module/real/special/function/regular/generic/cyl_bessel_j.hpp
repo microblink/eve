@@ -15,6 +15,7 @@
 #include <eve/function/is_odd.hpp>
 #include <eve/module/real/special/detail/bessel_kernel.hpp>
 #include <eve/detail/hz_device.hpp>
+#include <iostream>
 
 namespace eve::detail
 {
