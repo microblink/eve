@@ -69,11 +69,6 @@ namespace eve::detail
         }
       }
       const T Eps = eve::eps(as(x));
-      //  When the multiplier is n i.e.
-      //  fp_min = n * min()
-      //  Then j_0 and n_0 tank at x = 8 * n (j_0 = 0 and n_0 = nan)!
-      //const T fp_min = T(20) * std::numeric_limits<T>::min();
-
       const T fp_min = eve::sqrt(smallestposval(as(x)));
       constexpr int max_iter = 15000;
       const T x_min = T(2);

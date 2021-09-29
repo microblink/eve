@@ -23,20 +23,27 @@ namespace eve::detail
   template<real_scalar_value I, floating_real_scalar_value T>
   EVE_FORCEINLINE auto cyl_bessel_j_(EVE_SUPPORTS(cpu_), I nu, T x) noexcept
   {
+    std::cout << "scalarscalar" << std::endl;
+    if(x == eve::inf(as(x))) return zero(as(x));
     auto defined =  is_ltz(x) && eve::is_flint(nu);
     x = eve::abs(x);
     if  (sqr(x) < 10 * (inc(nu)))
     {
-      return kernel_ij_series(nu, x, T(1), 200);
+      std::cout << "scalarscalar small" << std::endl;
+      return kernel_ij_series(nu, x, T(-1), 200);
     }
     else if (x > T(10000))
     {
-      return x+nu;
+      std::cout << "scalarscalar large" << std::endl;
+      if(x == eve::inf(as(x))) return  defined ? zero(as(x)): nan(as(x));
+      auto [j, y] = kernel_asymp_jy(nu, x);
+      return j;
     }
     else
     {
+      std::cout << "scalarscalar medium" << std::endl;
       auto [j, jp, n, np] = kernel_jy(nu, x);
-      j = defined && is_odd(nu) ? -x :x;
+      j = defined && is_odd(nu) ? -j :j;
       return j;
     }
   }
@@ -44,12 +51,14 @@ namespace eve::detail
   template<real_scalar_value I, floating_real_simd_value T>
   EVE_FORCEINLINE auto cyl_bessel_j_(EVE_SUPPORTS(cpu_), I nu, T x) noexcept
   {
-    return cyl_bessel_j(T(nu), x);
+    std::cout << "scalarsimd" << std::endl;
+     return cyl_bessel_j(T(nu), x);
   }
 
   template<real_simd_value I, floating_real_scalar_value T>
   EVE_FORCEINLINE auto cyl_bessel_j_(EVE_SUPPORTS(cpu_), I nu, T x) noexcept
   {
+     std::cout << "simdscalar" << std::endl;
     using c_t = wide <T, cardinal_t<I>>;
     return cyl_bessel_j(convert(nu, as(x)), c_t(x));
   }
@@ -57,25 +66,40 @@ namespace eve::detail
    template<integral_simd_value I, floating_real_value T>
   EVE_FORCEINLINE auto cyl_bessel_j_(EVE_SUPPORTS(cpu_), I nu, T x) noexcept
   {
-    return cyl_bessel_j(convert(nu, as(element_type_t<T>())), x);
+    std::cout << "integralany" << std::endl;
+     return cyl_bessel_j(convert(nu, as(element_type_t<T>())), x);
   }
 
-  template<floating_real_value T>
+  template<floating_real_simd_value T>
   EVE_FORCEINLINE auto cyl_bessel_j_(EVE_SUPPORTS(cpu_), T nu, T x) noexcept
   {
+    auto xneg    = is_ltz(x);
+    auto defined = xneg && eve::is_flint(nu);
     if constexpr(has_native_abi_v<T>)
     {
-      auto br_large = [](auto nu, auto x){
+      auto br_large = [xneg, defined](auto nu, auto x){
         std::cout << "large" << std::endl;
         x =  if_else(x > T(10000), x, T(10000));
         auto [j, y] = kernel_asymp_jy(nu, x);
-         return j;
+        j = if_else(x == eve::inf(as(x))
+                   , if_else( xneg
+                            , if_else(defined
+                                     , zero
+                                     , nan(as(x)))
+                            , zero)
+                   , j);
+        return j;
       };
 
       auto br_small = [](auto nu, auto x){
        std::cout << "small" << std::endl;
-         x =  if_else((sqr(x) < 10 * (inc(nu))), x, zero);
-        return kernel_ij_series(nu, x, element_type_t<T>(-1), 200);
+         x =  if_else((sqr(x) < 10 * (inc(nu))), x, one);
+       auto j = kernel_ij_series(nu, x, element_type_t<T>(-1), 200);
+       return if_else(is_eqz(x)
+                     , if_else(is_eqz(nu)
+                              , one(as(x))
+                              , zero)
+                     , j);
       };
 
       auto br_medium = [](auto nu, auto x, auto notdone){
@@ -85,7 +109,6 @@ namespace eve::detail
         return j;
       };
 
-      auto defined = is_ltz(x) && eve::is_flint(nu);
       x = if_else(defined, -x, x);
       auto r = nan(as<T>()); //nan case treated here
       auto notdone = is_not_nan(x);
@@ -102,6 +125,7 @@ namespace eve::detail
         }
       }
       r = if_else(defined && is_odd(nu), -r, r);
+
       return r;
     }
     else

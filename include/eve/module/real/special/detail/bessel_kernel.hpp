@@ -526,22 +526,23 @@ namespace eve::detail
     return kernel_ij_series(convert(nu, as(element_type_t<T>())), x, sgn, max_iter);
   }
 
-  template<floating_real_value T>
+  template<floating_real_simd_value T>
   auto kernel_ij_series(T nu, T x, element_type_t<T> sgn, unsigned int max_iter)
   {
     if constexpr(real_scalar_value<T>) if (x == T(0)) return nu == T(0) ? T(1) : T(0);
-    const T x2 = x / T(2);
+    const T x2 = x * T(0.5);
     T fact = nu * eve::log(x2);
     fact -= eve::lgamma(inc(nu));
     fact = eve::exp(fact);
     const T xx4 = sgn * sqr(x2);
     T jn = T(1);
     T term = T(1);
+
     for (unsigned int i = 1; i < max_iter; ++i)
     {
       term *= xx4 / (T(i) * (nu + T(i)));
-      auto test = eve::abs(term) < abs(jn)*eps(as(x));
-      jn += if_else(test, zero, term);
+      jn += term; //if_else(test, zero, term);
+      auto test = eve::abs(term/jn) < eps(as(x));
       if (eve::all(test))  break;
     }
     auto r = fact * jn;
@@ -549,7 +550,26 @@ namespace eve::detail
     else return if_else(is_eqz(x), if_else(is_eqz(nu), zero, one(as(x))), r);
   }
 
+  template<floating_real_scalar_value T>
+  auto kernel_ij_series(T nu, T x, element_type_t<T> sgn, unsigned int max_iter)
+  {
+    if (x == T(0)) return nu == T(0) ? T(1) : T(0);
+    const T x2 = x * T(0.5);
+    T fact = nu * eve::log(x2);
+    fact -= eve::lgamma(inc(nu));
+    fact = eve::exp(fact);
+    const T xx4 = sgn * sqr(x2);
+    T jn = T(1);
+    T term = T(1);
 
+    for (unsigned int i = 1; i < max_iter; ++i)
+    {
+      term *= xx4 / (T(i) * (nu + T(i)));
+      jn += term; //if_else(test, zero, term);
+      if (eve::abs(term/jn) < eps(as(x))) break;
+    }
+    return fact * jn;
+  }
 
   /////////////////////////////////////////////////////////////////////////
   //   This routine computes the asymptotic cylindrical Bessel
