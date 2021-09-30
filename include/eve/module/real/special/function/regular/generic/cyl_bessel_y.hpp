@@ -8,111 +8,121 @@
 #pragma once
 
 #include <eve/concept/value.hpp>
-#include <eve/function/fms.hpp>
-#include <eve/function/abs.hpp>
-#include <eve/function/any.hpp>
-#include <eve/function/cospi.hpp>
-#include <eve/function/cyl_bessel_y0.hpp>
-#include <eve/function/cyl_bessel_y1.hpp>
-#include <eve/detail/hz_device.hpp>
-#include <eve/function/fms.hpp>
-#include <eve/function/fnma.hpp>
 #include <eve/function/if_else.hpp>
-#include <eve/function/is_nltz.hpp>
-#include <eve/function/is_nlez.hpp>
+#include <eve/function/is_ltz.hpp>
 #include <eve/function/is_flint.hpp>
+#include <eve/function/is_not_nan.hpp>
 #include <eve/function/is_odd.hpp>
-#include <eve/function/rec.hpp>
-#include <eve/function/sqr.hpp>
-#include <eve/constant/true.hpp>
-#include <type_traits>
+#include <eve/constant/inf.hpp>
+#include <eve/constant/nan.hpp>
+#include <eve/module/real/special/detail/bessel_kernel.hpp>
+#include <eve/function/cyl_bessel_y0.hpp>
+#include <eve/detail/hz_device.hpp>
+
 
 namespace eve::detail
 {
-  template<integral_scalar_value I, floating_real_scalar_value T>
-  EVE_FORCEINLINE auto cyl_bessel_y_(EVE_SUPPORTS(cpu_), I in, T x) noexcept
-  {
-    if( in == 0 )  return cyl_bessel_y0(x);
-    else  if( in == 1 )  return cyl_bessel_y1(x);
-    else return cyl_bessel_y(T(in), x);
-  }
 
-  template<integral_scalar_value I, floating_real_simd_value T>
-  EVE_FORCEINLINE auto cyl_bessel_y_(EVE_SUPPORTS(cpu_), I in, T x) noexcept
+  template<real_scalar_value I, floating_real_scalar_value T>
+  EVE_FORCEINLINE auto cyl_bessel_y_(EVE_SUPPORTS(cpu_), I nu, T x) noexcept
   {
-    if( in == 0 )  return cyl_bessel_y0(x);
-    else  if( in == 1 )  return cyl_bessel_y1(x);
-    else return cyl_bessel_y(T(in), x);
-  }
-
-  template<integral_simd_value I, floating_real_simd_value T>
-  EVE_FORCEINLINE auto cyl_bessel_y_(EVE_SUPPORTS(cpu_), I in, T x) noexcept
-  requires compatible_values<T, I>
-  {
-    using elt_t =  element_type_t<T>;
-    return cyl_bessel_y(convert(in, as<elt_t>()), x);
-  }
-
-  template<floating_real_simd_value I, floating_real_scalar_value T>
-  EVE_FORCEINLINE auto cyl_bessel_y_(EVE_SUPPORTS(cpu_), I in, T x) noexcept
-  requires compatible_values<T, I>
-  {
-    if constexpr( has_native_abi_v<T> )
+    if (is_eqz(nu)) return cyl_bessel_y0(x);
+    std::cout << "scalarscalar" << std::endl;
+    if(is_ltz(x)) return nan(as(x));
+    if(is_eqz(x)) return minf(as(x));
+   if  (sqr(x) < 10 * (inc(nu)))
     {
-      return cyl_bessel_y(in, I(x));
+      std::cout << "scalarscalar small" << std::endl;
+      return kernel_ij_series(nu, x, T(1), 200);
+    }
+    else if (x > T(10000))
+    {
+      std::cout << "scalarscalar large" << std::endl;
+      if(x == inf(as(x))) return   zero(as(x));
+      auto [j, y] = kernel_asymp_jy(nu, x);
+      return y;
     }
     else
-      return apply_over(cyl_bessel_y, in, x);
+    {
+      std::cout << "scalarscalar medium" << std::endl;
+      auto [j, jp, y, yp] = kernel_jy(nu, x);
+      return y;
+    }
   }
 
-  template<floating_real_value T>
-  EVE_FORCEINLINE auto cyl_bessel_y_(EVE_SUPPORTS(cpu_), T a0, T a1) noexcept
+  template<real_scalar_value I, floating_real_simd_value T>
+  EVE_FORCEINLINE auto cyl_bessel_y_(EVE_SUPPORTS(cpu_), I nu, T x) noexcept
   {
-    if constexpr( has_native_abi_v<T> )
+    std::cout << "scalarsimd" << std::endl;
+     return cyl_bessel_y(T(nu), x);
+  }
+
+  template<real_simd_value I, floating_real_scalar_value T>
+  EVE_FORCEINLINE auto cyl_bessel_y_(EVE_SUPPORTS(cpu_), I nu, T x) noexcept
+  {
+     std::cout << "simdscalar" << std::endl;
+    using c_t = wide <T, cardinal_t<I>>;
+    return cyl_bessel_y(convert(nu, as(x)), c_t(x));
+  }
+
+   template<integral_simd_value I, floating_real_value T>
+  EVE_FORCEINLINE auto cyl_bessel_y_(EVE_SUPPORTS(cpu_), I nu, T x) noexcept
+  {
+    std::cout << "integralany" << std::endl;
+     return cyl_bessel_y(convert(nu, as(element_type_t<T>())), x);
+  }
+
+  template<floating_real_simd_value T>
+  EVE_FORCEINLINE auto cyl_bessel_y_(EVE_SUPPORTS(cpu_), T nu, T x) noexcept
+  {
+    auto xnotinf   = x != inf(as<T>());
+    if constexpr(has_native_abi_v<T>)
     {
-      auto sgn = if_else(is_ltz(a0), cospi(a0), one);
-      a0 = eve::abs(a0);
-      auto isneza1 =  is_nez(a1);
-      auto notdone = is_nlez(a1) && is_flint(a0);
-      T r = if_else(isneza1, allbits, minf(as(a1)));
-      if (eve::any(notdone))
+      auto br_large = [xnotinf](auto nu, auto x){
+        std::cout << "large" << std::endl;
+        x =  if_else(x > T(10000), x, T(10000));
+        auto [j, y] = kernel_asymp_jy(nu, x);
+        j = if_else(x == inf(as(x))
+                   , zero
+                   , j);
+        return if_else(xnotinf, j, 0);
+      };
+
+      auto br_small = [](auto nu, auto x){
+        std::cout << "small" << std::endl;
+        x =  if_else((sqr(x) < 10 * (inc(nu))), x, one);
+        auto y = kernel_ij_series(nu, x, element_type_t<T>(1), 200);
+        return if_else(is_eqz(x)
+                      , minf(as(x))
+                      , y);
+      };
+
+      auto br_medium = [](auto nu, auto x, auto notdone){
+        std::cout << "medium" << std::endl;
+        x = if_else(notdone, x, one);
+        auto [j, jp, y, yp] = kernel_jy(nu, x);
+        return if_else(is_eqz(x)
+                     , minf(as(x))
+                     , y);
+      };
+
+      auto r = nan(as<T>()); //nan case treated here
+      auto notdone = is_not_nan(x) && is_gez(x);
+      if( eve::any(notdone) )
       {
-        auto y0 = cyl_bessel_y0(a1);
-        auto br_0 =  [](auto y0) { return y0;};
-        notdone = next_interval(br_0, notdone, is_eqz(a0), r, y0);
-        if (eve::any(notdone))
+        notdone = next_interval(br_small,  notdone, (sqr(x) < 10 * (inc(nu))), r, nu, x);
+        if( eve::any(notdone) )
         {
-          auto y1 = cyl_bessel_y1(a1);
-          auto br_1 =  [](auto y1) { return y1;};
-          notdone = next_interval(br_1, notdone, a0 == 1, r, y1);
-          if (eve::any(notdone))
+          notdone = next_interval(br_large,  notdone, x > T(10000), r, nu, x);
+          if( eve::any(notdone) )
           {
-            auto br_last = [](auto n1,  auto x,  auto y0, auto y1)
-              {
-                T anm2 = y0;
-                T anm1 = y1;
-                T r = T(2);
-                T xinv = rec(x);
-                T an(0);
-                auto test = true_(as(x));
-                do
-                {
-                  an = if_else(test,r*anm1*xinv-anm2, an);
-                  anm2 = if_else(test,anm1, anm2);
-                  anm1 = if_else(test,an, anm1);
-                  r += T(2);
-                  test = (r < n1);
-                }
-                while(eve::any(test) );
-                return an;
-              };
-            last_interval(br_last, notdone, r, 2*abs(a0), a1, y0, y1);
+            notdone = last_interval(br_medium,  notdone, r, nu, x, notdone);
           }
         }
       }
-      return if_else(a1 == inf(as(a1)), zero, sgn*r);
+      return r;
     }
     else
-      return apply_over(cyl_bessel_y, a0, a1);
+      return apply_over(cyl_bessel_y, nu, x);
   }
 }

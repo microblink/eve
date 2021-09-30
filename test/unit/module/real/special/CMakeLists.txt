@@ -19,8 +19,9 @@ add_dependencies(unit.real.special.exe  unit.real.special.simd.exe   )
 ##==================================================================================================
 ## new style tests
 ##==================================================================================================
-make_unit("unit.real.special"  cyl_bessel_jy.cpp           )
 make_unit("unit.real.special"  cyl_bessel_j.cpp            )
+make_unit("unit.real.special"  cyl_bessel_y.cpp            )
+make_unit("unit.real.special"  cyl_bessel_y0.cpp           )
 make_unit("unit.real.special"  beta.cpp                    )
 make_unit("unit.real.special"  betainc.cpp                 )
 make_unit("unit.real.special"  betainc_inv.cpp             )
