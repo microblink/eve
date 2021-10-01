@@ -9,68 +9,21 @@
 
 #include <eve/detail/hz_device.hpp>
 #include <eve/concept/value.hpp>
-#include <eve/function/cyl_bessel_j.hpp>
-#include <eve/function/fms.hpp>
-#include <eve/function/all.hpp>
-#include <eve/function/bit_xor.hpp>
-#include <eve/function/if_else.hpp>
-#include <eve/function/fma.hpp>
-#include <eve/function/fms.hpp>
-#include <eve/function/cyl_bessel_j0.hpp>
-#include <eve/function/none.hpp>
-#include <eve/function/sincos.hpp>
-#include <eve/function/sin.hpp>
-#include <eve/function/cos.hpp>
-#include <eve/function/log.hpp>
-#include <eve/function/rec.hpp>
-#include <eve/function/rsqrt.hpp>
-#include <eve/function/sqr.hpp>
-#include <eve/function/sqrt.hpp>
-#include <eve/constant/inf.hpp>
-#include <eve/constant/invsqrt_2.hpp>
 #include <eve/constant/pi.hpp>
-#include <eve/constant/pio_4.hpp>
-#include <type_traits>
-#include <eve/function/horner.hpp>
+#include <eve/function/all.hpp>
+#include <eve/function/cyl_bessel_j.hpp>
+#include <eve/function/fma.hpp>
+#include <eve/function/if_else.hpp>
+#include <eve/function/log.hpp>
+#include <eve/function/none.hpp>
+#include <eve/function/rsqrt.hpp>
+#include <eve/function/sincos.hpp>
+#include <eve/function/sqr.hpp>
+#include <eve/module/real/special/detail/evaluate_rational.hpp>
 #include <array>
 
 namespace eve::detail
 {
-
-  template <class T, class U, class V>
-  EVE_FORCEINLINE V evaluate_rational(const T num, const U den, V z) noexcept
-  {
-    auto N =  num.size();
-    auto eval_small = [&num, &den, N](auto z)
-      {
-        V s1(num[N-1]);
-        V s2(den[N-1]);
-        for(int i = (int)N - 2; i >= 0; --i)
-        {
-          s1 = fma(s1, z, num[i]);
-          s2 = fma(s2, z, den[i]);
-        }
-        return s1/s2;
-      };
-    auto eval_large = [&num, &den, N](auto z)
-      {
-        z = rec(z);
-        V s1(num[0]);
-        V s2(den[0]);
-        for(unsigned i = 1; i < N; ++i)
-        {
-          s1 = fma(s1, z, num[i]);
-          s2 = fma(s2, z, den[i]);
-        }
-        return s1/s2;
-       };
-    auto test = z <= V(1);
-    if(eve::all(test)) return eval_small(z);
-    else if(eve::none(test)) return  eval_large(z);
-    else return if_else(test,  eval_small(z),  eval_large(z));
-  }
-
-
   template<floating_real_scalar_value T>
   EVE_FORCEINLINE T cyl_bessel_y0_(EVE_SUPPORTS(cpu_), T x) noexcept
   {
@@ -217,7 +170,6 @@ namespace eve::detail
       // 1 / sqrt(2):
       //
      auto [sx, cx] = sincos(x);
-//        return factor*( rc * (sx - cx) +  y * rs * (cx + sx)) ;
      return factor*fma(y, rs * (cx + sx), rc * (sx - cx));
     }
   }
@@ -371,7 +323,6 @@ namespace eve::detail
         //
         auto [sx, cx] = sincos(x);
         return factor*fma(y, rs * (cx + sx), rc * (sx - cx));
-//       return factor*( rc * (sx - cx) +  y * rs * (cx + sx)) ;
       };
 
       auto r = nan(as(x));
@@ -398,4 +349,5 @@ namespace eve::detail
       return r;
     }
     else return apply_over(cyl_bessel_y0, x);
+  }
 }
