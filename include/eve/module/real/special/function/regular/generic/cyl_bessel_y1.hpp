@@ -28,7 +28,6 @@ namespace eve::detail
   template<floating_real_scalar_value T>
   EVE_FORCEINLINE T cyl_bessel_y1_(EVE_SUPPORTS(cpu_), T x) noexcept
   {
-    std::cout << "cyl_bessel_y1_" << std::endl;
     auto Pi = eve::pi(as(x));
     if (x < 0)  return nan(as(x));
     if (x == 0) return minf(as(x));

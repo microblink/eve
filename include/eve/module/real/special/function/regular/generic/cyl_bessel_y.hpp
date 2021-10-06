@@ -32,19 +32,19 @@ namespace eve::detail
     if(is_eqz(x)) return minf(as(x));
    if  (sqr(x) < 10 * (inc(nu)))
     {
-      std::cout << "scalarscalar small" << std::endl;
+      std::cout << "scalarscalar small cyl_bessel_y" << std::endl;
       return kernel_ij_series(nu, x, T(1), 200);
     }
     else if (x > T(10000))
     {
-      std::cout << "scalarscalar large" << std::endl;
+      std::cout << "scalarscalar large cyl_bessel_y" << std::endl;
       if(x == inf(as(x))) return   zero(as(x));
       auto [j, y] = kernel_asymp_jy(nu, x);
       return y;
     }
     else
     {
-      std::cout << "scalarscalar medium" << std::endl;
+      std::cout << "scalarscalar medium cyl_bessel_y" << std::endl;
       auto [j, jp, y, yp] = kernel_jy(nu, x);
       return y;
     }
@@ -79,7 +79,7 @@ namespace eve::detail
     if constexpr(has_native_abi_v<T>)
     {
       auto br_large = [xnotinf](auto nu, auto x){
-        std::cout << "large" << std::endl;
+        std::cout << "large cyl_bessel_y" << std::endl;
         x =  if_else(x > T(10000), x, T(10000));
         auto [j, y] = kernel_asymp_jy(nu, x);
         j = if_else(x == inf(as(x))
@@ -89,7 +89,7 @@ namespace eve::detail
       };
 
       auto br_small = [](auto nu, auto x){
-        std::cout << "small" << std::endl;
+        std::cout << "small cyl_bessel_y" << std::endl;
         x =  if_else((sqr(x) < 10 * (inc(nu))), x, one);
         auto y = kernel_ij_series(nu, x, element_type_t<T>(1), 200);
         return if_else(is_eqz(x)
@@ -98,7 +98,7 @@ namespace eve::detail
       };
 
       auto br_medium = [](auto nu, auto x, auto notdone){
-        std::cout << "medium" << std::endl;
+        std::cout << "medium cyl_bessel_y" << std::endl;
         x = if_else(notdone, x, one);
         auto [j, jp, y, yp] = kernel_jy(nu, x);
         return if_else(is_eqz(x)
