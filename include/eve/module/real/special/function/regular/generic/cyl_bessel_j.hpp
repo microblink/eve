@@ -23,25 +23,21 @@ namespace eve::detail
   template<real_scalar_value I, floating_real_scalar_value T>
   EVE_FORCEINLINE auto cyl_bessel_j_(EVE_SUPPORTS(cpu_), I nu, T x) noexcept
   {
-    std::cout << "scalarscalar" << std::endl;
     if(x == eve::inf(as(x))) return zero(as(x));
     auto defined =  is_ltz(x) && eve::is_flint(nu);
     x = eve::abs(x);
     if  (sqr(x) < 10 * (inc(nu)))
     {
-      std::cout << "scalarscalar small" << std::endl;
       return kernel_ij_series(nu, x, T(-1), 200);
     }
     else if (x > T(10000))
     {
-      std::cout << "scalarscalar large" << std::endl;
       if(x == eve::inf(as(x))) return  defined ? zero(as(x)): nan(as(x));
       auto [j, y] = kernel_asymp_jy(nu, x);
       return j;
     }
     else
     {
-      std::cout << "scalarscalar medium" << std::endl;
       auto [j, jp, n, np] = kernel_jy(nu, x);
       j = defined && is_odd(nu) ? -j :j;
       return j;
@@ -51,14 +47,12 @@ namespace eve::detail
   template<real_scalar_value I, floating_real_simd_value T>
   EVE_FORCEINLINE auto cyl_bessel_j_(EVE_SUPPORTS(cpu_), I nu, T x) noexcept
   {
-    std::cout << "scalarsimd" << std::endl;
      return cyl_bessel_j(T(nu), x);
   }
 
   template<real_simd_value I, floating_real_scalar_value T>
   EVE_FORCEINLINE auto cyl_bessel_j_(EVE_SUPPORTS(cpu_), I nu, T x) noexcept
   {
-     std::cout << "simdscalar" << std::endl;
     using c_t = wide <T, cardinal_t<I>>;
     return cyl_bessel_j(convert(nu, as(x)), c_t(x));
   }
@@ -66,7 +60,6 @@ namespace eve::detail
    template<integral_simd_value I, floating_real_value T>
   EVE_FORCEINLINE auto cyl_bessel_j_(EVE_SUPPORTS(cpu_), I nu, T x) noexcept
   {
-    std::cout << "integralany" << std::endl;
      return cyl_bessel_j(convert(nu, as(element_type_t<T>())), x);
   }
 
@@ -78,7 +71,6 @@ namespace eve::detail
     if constexpr(has_native_abi_v<T>)
     {
       auto br_large = [xneg, defined](auto nu, auto x){
-        std::cout << "large" << std::endl;
         x =  if_else(x > T(10000), x, T(10000));
         auto [j, y] = kernel_asymp_jy(nu, x);
         j = if_else(x == eve::inf(as(x))
@@ -92,7 +84,6 @@ namespace eve::detail
       };
 
       auto br_small = [](auto nu, auto x){
-       std::cout << "small" << std::endl;
          x =  if_else((sqr(x) < 10 * (inc(nu))), x, one);
        auto j = kernel_ij_series(nu, x, element_type_t<T>(-1), 200);
        return if_else(is_eqz(x)
@@ -103,7 +94,6 @@ namespace eve::detail
       };
 
       auto br_medium = [](auto nu, auto x, auto notdone){
-        std::cout << "medium" << std::endl;
        x = if_else(notdone, x, zero);
         auto [j, jp, n, np] = kernel_jy(nu, x);
         return j;
@@ -125,7 +115,6 @@ namespace eve::detail
         }
       }
       r = if_else(defined && is_odd(nu), -r, r);
-
       return r;
     }
     else

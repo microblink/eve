@@ -49,7 +49,6 @@ namespace eve::detail
     else
     {
       T nu(n);
-      std::cout << (x *x < 10 * (nu + 1)) << std::endl;
       T jnu, jpnu, nnu, npnu;
       if (x == inf(as(x))) return kumi::make_tuple(T(0), nan(as(x)), T(0), nan(as(x)));
       else if (is_ltz(x)) return kumi::make_tuple(nan(as(x)),  nan(as(x)),  nan(as(x)), nan(as(x)));

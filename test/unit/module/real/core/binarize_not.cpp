@@ -28,10 +28,7 @@ EVE_TEST_TYPES( "Check return types of binarize_not"
   using i_t = eve::as_integer_t<v_t>;
   using wi_t = eve::as_wide_t<i_t, eve::cardinal_t<T>>;
   using wc_t = eve::as_wide_t<std::int8_t, eve::cardinal_t<T>>;
-  wc_t z(0);
-  std::cout << z;
-  using c_t  = eve::element_type_t<wc_t>;
-  c_t x(0);   std::cout << x;
+
   TTS_EXPR_IS( eve::binarize_not(logical<T>())  , T);
   TTS_EXPR_IS( eve::binarize_not(logical<v_t>()), v_t);
   TTS_EXPR_IS( eve::binarize_not(logical<T>(),  eve::as<i_t>()) , wi_t);

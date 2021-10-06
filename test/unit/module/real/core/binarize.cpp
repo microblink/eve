@@ -29,10 +29,7 @@ EVE_TEST_TYPES( "Check return types of binarize"
   using i_t = eve::as_integer_t<v_t>;
   using wi_t = eve::as_wide_t<i_t, eve::cardinal_t<T>>;
   using wc_t = eve::as_wide_t<std::int8_t, eve::cardinal_t<T>>;
-  wc_t z(0);
-  std::cout << z;
-  using c_t  = eve::element_type_t<wc_t>;
-  c_t x(0);   std::cout << x;
+
   TTS_EXPR_IS( eve::binarize(logical<T>())  , T);
   TTS_EXPR_IS( eve::binarize(logical<v_t>()), v_t);
   TTS_EXPR_IS( eve::binarize(logical<T>(),  eve::as<i_t>()) , wi_t);
@@ -71,5 +68,3 @@ EVE_TEST( "Check behavior of binarize(wide)"
   TTS_IEEE_EQUAL( binarize(a0 < T(64), v_t(43)), map(ref_binarize2, a0));
   TTS_IEEE_EQUAL( binarize(a0 < T(64), i_t(43)), map(ref_binarizei2, a0));
 };
-
-

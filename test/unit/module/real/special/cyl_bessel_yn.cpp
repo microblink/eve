@@ -47,7 +47,7 @@
 //===  cyl_bessel_yn scalar tests
 //==================================================================================================
 EVE_TEST( "Check behavior of cyl_bessel_yn for j on wide"
-        , eve::test::simd::ieee_floats
+        , eve::test::simd::ieee_reals
         , eve::test::generate(eve::test::randoms(0.0, 10.0),
                               eve::test::ramp(0))
         )
@@ -82,102 +82,19 @@ EVE_TEST( "Check behavior of cyl_bessel_yn for j on wide"
     }
   }
 
-  TTS_ULP_EQUAL(eve__cyl_bessel_yn(T(0), T(0)), T(std_cyl_bessel_yn(0.0, 0.0)), 200);
-  TTS_ULP_EQUAL(eve__cyl_bessel_yn(T(1), T(0)), T(std_cyl_bessel_yn(1.0, 0.0)), 200);
-  TTS_ULP_EQUAL(eve__cyl_bessel_yn(T(2), T(0)), T(std_cyl_bessel_yn(2.0, 0.0)), 200);
-  TTS_ULP_EQUAL(eve__cyl_bessel_yn(T(0), T(1)), T(std_cyl_bessel_yn(0.0, 1.0)), 200);
-  TTS_ULP_EQUAL(eve__cyl_bessel_yn(T(1), T(1)), T(std_cyl_bessel_yn(1.0, 1.0)), 200);
-  TTS_ULP_EQUAL(eve__cyl_bessel_yn(T(2), T(1)), T(std_cyl_bessel_yn(2.0, 1.0)), 200);
-  TTS_ULP_EQUAL(eve__cyl_bessel_yn(T(0), T(3)), T(std_cyl_bessel_yn(0.0, 3.0)), 200);
-  TTS_ULP_EQUAL(eve__cyl_bessel_yn(T(1), T(3)), T(std_cyl_bessel_yn(1.0, 3.0)), 200);
-  TTS_ULP_EQUAL(eve__cyl_bessel_yn(T(2), T(3)), T(std_cyl_bessel_yn(2.0, 3.0)), 200);
+  TTS_ULP_EQUAL(eve__cyl_bessel_yn(T(0), T(0)), T(std_cyl_bessel_yn(v_t(0.0), v_t(0.0))), 200);
+  TTS_ULP_EQUAL(eve__cyl_bessel_yn(T(1), T(0)), T(std_cyl_bessel_yn(v_t(1.0), v_t(0.0))), 200);
+  TTS_ULP_EQUAL(eve__cyl_bessel_yn(T(2), T(0)), T(std_cyl_bessel_yn(v_t(2.0), v_t(0.0))), 200);
+  TTS_ULP_EQUAL(eve__cyl_bessel_yn(T(0), T(1)), T(std_cyl_bessel_yn(v_t(0.0), v_t(1.0))), 200);
+  TTS_ULP_EQUAL(eve__cyl_bessel_yn(T(1), T(1)), T(std_cyl_bessel_yn(v_t(1.0), v_t(1.0))), 200);
+  TTS_ULP_EQUAL(eve__cyl_bessel_yn(T(2), T(1)), T(std_cyl_bessel_yn(v_t(2.0), v_t(1.0))), 200);
+  TTS_ULP_EQUAL(eve__cyl_bessel_yn(T(0), T(3)), T(std_cyl_bessel_yn(v_t(0.0), v_t(3.0))), 200);
+  TTS_ULP_EQUAL(eve__cyl_bessel_yn(T(1), T(3)), T(std_cyl_bessel_yn(v_t(1.0), v_t(3.0))), 200);
+  TTS_ULP_EQUAL(eve__cyl_bessel_yn(T(2), T(3)), T(std_cyl_bessel_yn(v_t(2.0), v_t(3.0))), 200);
 
-  TTS_ULP_EQUAL(eve__cyl_bessel_yn(T(0), a0), map(std_cyl_bessel_yn, T(0), a0), 200);
-  TTS_ULP_EQUAL(eve__cyl_bessel_yn(T(1), a0), map(std_cyl_bessel_yn, T(1), a0), 200);
-  TTS_ULP_EQUAL(eve::cyl_bessel_y1(a0),       map(std_cyl_bessel_yn, T(1), a0), 200);
-  TTS_ULP_EQUAL(eve__cyl_bessel_yn(T(2), a0), map(std_cyl_bessel_yn, T(2), a0), 200);
-  TTS_ULP_EQUAL(eve__cyl_bessel_yn(n     , a0), map(std_cyl_bessel_yn, n,    a0), 200);
-    std::cout << "a0  " << std::setprecision(15) << a0 << std::endl;
-    std::cout << " n  " <<   n << std::endl;
-  if constexpr(eve::cardinal_v<T> == 4)
-  {
-    std::cout << "a0.get(3)  " << std::setprecision(15) << a0.get(3) << std::endl;
-    std::cout << " n.get(3)  " <<   n.get(3) << std::endl;
-    TTS_ULP_EQUAL(eve__cyl_bessel_yn(v_t(n.get(3)), v_t(a0.get(3))), v_t(std_cyl_bessel_yn(v_t(n.get(3)), v_t(a0.get(3)))), 10);
-  }
+  TTS_ULP_EQUAL(eve__cyl_bessel_yn(T(0), a0), map(std_cyl_bessel_yn, v_t(0), a0), 200);
+  TTS_ULP_EQUAL(eve__cyl_bessel_yn(T(1), a0), map(std_cyl_bessel_yn, v_t(1), a0), 200);
+  TTS_ULP_EQUAL(eve::cyl_bessel_y1(a0),       map(std_cyl_bessel_yn, v_t(1), a0), 200);
+  TTS_ULP_EQUAL(eve__cyl_bessel_yn(T(2), a0), map(std_cyl_bessel_yn, v_t(2), a0), 200);
+  TTS_ULP_EQUAL(eve__cyl_bessel_yn(n   , a0), map(std_cyl_bessel_yn, n     , a0), 200);
 };
-
-
-// EVE_TEST( "Check behavior of cyl_bessel_yn for y on wide"
-//         , eve::test::simd::ieee_doubles
-//         , eve::test::generate(eve::test::randoms(0.0, 10.0),
-//                               eve::test::ramp(0))
-//         )
-// <typename T>(T const& , T const & )
-// {
-//   using v_t = eve::element_type_t<T>;
-//   auto eve__cyl_bessel_y =  [](auto n, auto x) {
-//     auto y = eve::cyl_bessel_yn(n, x) ;
-//     return kumi::get<2>(y);
-//   };
-//   auto std_cyl_bessel_y =  [](v_t n, v_t x) { return std::cyl_neumann(n, x); };
-// //   if constexpr( eve::platform::supports_invalids )
-// //   {
-// //     TTS_ULP_EQUAL(eve__cyl_bessel_y(v_t(2), eve::minf(eve::as<v_t>())), eve::nan(eve::as<v_t>()), 0);
-// //     TTS_ULP_EQUAL(eve__cyl_bessel_y(v_t(2), eve::inf(eve::as<v_t>())), eve::zero(eve::as<v_t>()), 0);
-// //     TTS_ULP_EQUAL(eve__cyl_bessel_y(v_t(3), eve::nan(eve::as<v_t>())), eve::nan(eve::as<v_t>()), 0);
-// //   }
-// //   if constexpr(eve::cardinal_v<T> == 1)
-// //   {
-// //     TTS_ULP_EQUAL(eve__cyl_bessel_y(v_t(0), v_t(0)), v_t(std_cyl_bessel_y(0.0, 0.0)), 200);
-// //     TTS_ULP_EQUAL(eve__cyl_bessel_y(v_t(1), v_t(0)), v_t(std_cyl_bessel_y(1.0, 0.0)), 200);
-// //     TTS_ULP_EQUAL(eve__cyl_bessel_y(v_t(2), v_t(0)), v_t(std_cyl_bessel_y(2.0, 0.0)), 200);
-// //     TTS_ULP_EQUAL(eve__cyl_bessel_y(v_t(0.00001), v_t(4)), v_t(std_cyl_bessel_y(0.00001, 4.0)), 200);
-// //     TTS_ULP_EQUAL(eve__cyl_bessel_y(v_t(0.0000 ), v_t(4)), v_t(std_cyl_bessel_y(0.0000 , 4.0)), 200);
-
-// //    }
-// //   TTS_ULP_EQUAL(0, 0, 1);
-// //   TTS_ULP_EQUAL(eve__cyl_bessel_y(T(0), T(0)), T(std_cyl_bessel_y(0.0, 0.0)), 200);
-// //   TTS_ULP_EQUAL(eve__cyl_bessel_y(T(1), T(0)), T(std_cyl_bessel_y(1.0, 0.0)), 200);
-// //   TTS_ULP_EQUAL(eve__cyl_bessel_y(T(2), T(0)), T(std_cyl_bessel_y(2.0, 0.0)), 200);
-
-// //  TTS_ULP_EQUAL(eve__cyl_bessel_y(T(0), T(1)), T(std_cyl_bessel_y(0.0, 1.0)), 200);
-//   if constexpr(eve::cardinal_v<T> ==  1)
-//     TTS_ULP_EQUAL(eve__cyl_bessel_y(0.0, 1.1),  std_cyl_bessel_y(0.0, 1.0) , 200);
-//   else
-//     TTS_ULP_EQUAL(0, 0, 1);
-// //   TTS_ULP_EQUAL(eve__cyl_bessel_y(T(1), T(1)), T(std_cyl_bessel_y(1.0, 1.0)), 200);
-// //   TTS_ULP_EQUAL(eve__cyl_bessel_y(T(2), T(1)), T(std_cyl_bessel_y(2.0, 1.0)), 200);
-// //   TTS_ULP_EQUAL(eve__cyl_bessel_y(T(0), T(3)), T(std_cyl_bessel_y(0.0, 3.0)), 200);
-// //   TTS_ULP_EQUAL(eve__cyl_bessel_y(T(1), T(3)), T(std_cyl_bessel_y(1.0, 3.0)), 200);
-// //   TTS_ULP_EQUAL(eve__cyl_bessel_y(T(2), T(3)), T(std_cyl_bessel_y(2.0, 3.0)), 200);
-
-// //   TTS_ULP_EQUAL(eve__cyl_bessel_y(T(0), a0), map(std_cyl_bessel_y, T(0), a0), 200);
-// //   TTS_ULP_EQUAL(eve__cyl_bessel_y(T(1), a0), map(std_cyl_bessel_y, T(1), a0), 200);
-// //   TTS_ULP_EQUAL(eve__cyl_bessel_y(T(2), a0), map(std_cyl_bessel_y, T(2), a0), 200);
-// //   TTS_ULP_EQUAL(eve__cyl_bessel_y(T(0.5), a0), map(std_cyl_bessel_y, T(0.5), a0), 200);
-// //   TTS_ULP_EQUAL(eve__cyl_bessel_y(n     , a0), map(std_cyl_bessel_y, n,    a0), 200);
-
-// };
-
-
-
-//     v_t a, b, c, d;
-//     zorro::bessel_jn(v_t(0.00001), v_t(1), a, b, c, d);
-//     TTS_ULP_EQUAL(b, v_t(std_cyl_bessel_y(0.00001, 1.0)), 200);
-//     std::cout << a << "  " << c << "  " << b << "  " << d << std::endl;
-//    zorro::bessel_jn(v_t(0), v_t(1), a, b, c, d);
-//     std::cout << a << "  " << c << "  " << b << "  " << d << std::endl;
-//     std::cout << std_cyl_bessel_y(0.00001, 1.0) << std::endl;
-//     std::cout << std_cyl_bessel_y(0,      1.0) << std::endl;
-
-//     TTS_ULP_EQUAL(eve__cyl_bessel_y(v_t(1), v_t(1)), v_t(std_cyl_bessel_y(1.0, 1.0)), 200);
-//     TTS_ULP_EQUAL(eve__cyl_bessel_y(v_t(2), v_t(1)), v_t(std_cyl_bessel_y(2.0, 1.0)), 200);
-//     for(int i=1; i < 2; i*= 2)
-//     {
-//       TTS_ULP_EQUAL(eve__cyl_bessel_y(v_t(i), v_t(200)), v_t(std_cyl_bessel_y(v_t(i), 200)), 200);
-//       TTS_ULP_EQUAL(eve__cyl_bessel_y(v_t(i), v_t(5)), v_t(std_cyl_bessel_y(v_t(i), 5)), 200);
-//       TTS_ULP_EQUAL(eve__cyl_bessel_y(v_t(i), v_t(2)), v_t(std_cyl_bessel_y(v_t(i), 2)), 200);
-//       TTS_ULP_EQUAL(eve__cyl_bessel_y(v_t(i), v_t(1)), v_t(std_cyl_bessel_y(v_t(i), 1)), 200);
-//       TTS_ULP_EQUAL(eve__cyl_bessel_y(v_t(i), v_t(0)), v_t(std_cyl_bessel_y(v_t(i), 0)), 200);
-//     }

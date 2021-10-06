@@ -152,25 +152,3 @@ EVE_TEST( "Check behavior of cyl_bessel_jy for y on wide"
 //   TTS_ULP_EQUAL(eve__cyl_bessel_y(n     , a0), map(std_cyl_bessel_y, n,    a0), 100);
 
 };
-
-
-
-//     v_t a, b, c, d;
-//     zorro::bessel_jn(v_t(0.00001), v_t(1), a, b, c, d);
-//     TTS_ULP_EQUAL(b, v_t(std_cyl_bessel_y(0.00001, 1.0)), 10);
-//     std::cout << a << "  " << c << "  " << b << "  " << d << std::endl;
-//    zorro::bessel_jn(v_t(0), v_t(1), a, b, c, d);
-//     std::cout << a << "  " << c << "  " << b << "  " << d << std::endl;
-//     std::cout << std_cyl_bessel_y(0.00001, 1.0) << std::endl;
-//     std::cout << std_cyl_bessel_y(0,      1.0) << std::endl;
-
-//     TTS_ULP_EQUAL(eve__cyl_bessel_y(v_t(1), v_t(1)), v_t(std_cyl_bessel_y(1.0, 1.0)), 10);
-//     TTS_ULP_EQUAL(eve__cyl_bessel_y(v_t(2), v_t(1)), v_t(std_cyl_bessel_y(2.0, 1.0)), 10);
-//     for(int i=1; i < 2; i*= 2)
-//     {
-//       TTS_ULP_EQUAL(eve__cyl_bessel_y(v_t(i), v_t(10)), v_t(std_cyl_bessel_y(i, 10)), 10);
-//       TTS_ULP_EQUAL(eve__cyl_bessel_y(v_t(i), v_t(5)), v_t(std_cyl_bessel_y(i, 5)), 10);
-//       TTS_ULP_EQUAL(eve__cyl_bessel_y(v_t(i), v_t(2)), v_t(std_cyl_bessel_y(i, 2)), 10);
-//       TTS_ULP_EQUAL(eve__cyl_bessel_y(v_t(i), v_t(1)), v_t(std_cyl_bessel_y(i, 1)), 10);
-//       TTS_ULP_EQUAL(eve__cyl_bessel_y(v_t(i), v_t(0)), v_t(std_cyl_bessel_y(i, 0)), 10);
-//     }

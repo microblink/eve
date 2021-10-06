@@ -76,7 +76,6 @@ namespace eve::detail
   {
     if constexpr(integral_scalar_value<N>) return cyl_bessel_yn(T(nu), x);
     else EVE_ASSERT(is_flint(nu), "nu is not a floating integral value");
-    std::cout << "cyl_bessel_yn_ scalarscalar" << std::endl;
     if (x < 0)  return nan(as(x));
     if (is_eqz(x)) return minf(as(x));
     if (x == inf(as(x))) return zero(as(x));
@@ -128,14 +127,12 @@ namespace eve::detail
   template<real_scalar_value I, floating_real_simd_value T>
   EVE_FORCEINLINE auto cyl_bessel_yn_(EVE_SUPPORTS(cpu_), I nu, T x) noexcept
   {
-    std::cout << "scalarsimd" << std::endl;
     return cyl_bessel_yn(T(nu), x);
   }
 
   template<real_simd_value I, floating_real_scalar_value T>
     EVE_FORCEINLINE auto cyl_bessel_yn_(EVE_SUPPORTS(cpu_), I nu, T x) noexcept
   {
-    std::cout << "simdscalar" << std::endl;
     using c_t = wide <T, cardinal_t<I>>;
     return cyl_bessel_yn(convert(nu, as(x)), c_t(x));
   }
@@ -194,7 +191,6 @@ namespace eve::detail
           auto y1 = cyl_bessel_y1(x);
           if (eve::all(nu == 1)) return y1;
           // main case
-          std::cout << "icitte" << std::endl;
           auto prev = y0;
           auto current = y1;
           int k = 1;

@@ -46,8 +46,6 @@ namespace eve::detail
   template<real_scalar_value I, floating_real_scalar_value T>
   EVE_FORCEINLINE auto kernel_jy_(I n, T x) noexcept
   {
-    //std::cout << (x *x < 10 * (nu + 1)) << std::endl;
-
     if constexpr(std::is_integral_v<I>) return kernel_jy(T(n), x);
     else
     {
