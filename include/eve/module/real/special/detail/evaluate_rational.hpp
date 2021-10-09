@@ -12,6 +12,7 @@
 #include <eve/function/fma.hpp>
 #include <eve/function/if_else.hpp>
 #include <eve/function/none.hpp>
+#include <eve/function/pow.hpp>
 #include <eve/function/rec.hpp>
 #include <eve/function/horner.hpp>
 #include <eve/function/reverse_horner.hpp>
@@ -23,19 +24,44 @@ namespace eve::detail
   {
     auto eval_small = [&num, &den](auto z)
       {
-         return reverse_horner(z, num)/reverse_horner(z, den);
+        return reverse_horner(z, num)/reverse_horner(z, den);
       };
     auto eval_large = [&num, &den](auto z)
       {
         z = rec(z);
-        return horner(z, num)/horner(z, den);
+        auto r =  horner(z, num)/horner(z, den);
+        if(size(den) == size(num))
+          return r;
+        else
+          return r*pow(z, size(num)-size(den));
       };
     auto test = z <= V(1);
     if(eve::all(test)) return eval_small(z);
-    else if(eve::none(test)) return  eval_large(z);
+    else if(eve::all(z >= V(1))) return  eval_large(z);
     else return if_else(test,  eval_small(z),  eval_large(z));
   }
 
+  template <class T, class U, class V>
+  EVE_FORCEINLINE V reverse_evaluate_rational(const T num, const U den, V z) noexcept
+  {
+    auto eval_small = [&num, &den](auto z)
+      {
+        return horner(z, num)/horner(z, den);
+      };
+    auto eval_large = [&num, &den](auto z)
+      {
+        z = rec(z);
+        auto r = reverse_horner(z, num)/reverse_horner(z, den);
+        if(size(den) == size(num))
+          return r;
+        else
+          return r*pow(z, size(num)-size(den));
+     };
+    auto test = z <= V(1);
+    if(eve::all(test)) return eval_small(z);
+    else if(eve::all(z >= V(1))) return  eval_large(z);
+    else return if_else(test,  eval_small(z),  eval_large(z));
+  }
 //   template <class T, class U, class V>
 //   EVE_FORCEINLINE V evaluate_rational(const T num, const U den, V z) noexcept
 //   {

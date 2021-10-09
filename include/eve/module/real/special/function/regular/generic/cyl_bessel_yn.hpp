@@ -82,26 +82,32 @@ namespace eve::detail
     if (nu < 0 ) return cospi(nu)*cyl_bessel_yn(-nu, x);
     if (x < eve::eps(as(x)))
     {
+      std::cout << "kernel_yn_small " << std::endl;
       return bessel_yn_small_z(nu, x);
     }
-    else if (x > T(10000))//asymp
+    else if (x > T(1000))//asymp
     {
-      auto [j, y] = kernel_asymp_jy(T(nu), x);
+      std::cout << "kernel_asymp_jy " << std::endl;
+      //  auto [j, y] =
+      auto  y = asymptotic_bessel_y_large_x_2(T(nu), x);//  kernel_asymp_jy(T(nu), x);
       return y;
     }
-    auto y0 = cyl_bessel_y0(x);
+     auto y0 = cyl_bessel_y0(x);
     if (nu == 0) return y0;
     auto y1 = cyl_bessel_y1(x);
     if (nu == 1) return y1;
     if (x == 0) return minf(as(x));
     // main case
 
+      std::cout << "medium " << std::endl;
     auto prev = y0;
     auto current = y1;
+       std::cout << "  eve prev    " << std::hexfloat << prev << std::endl;
+       std::cout << "  eve current " << std::hexfloat << current << std::endl;
     int k = 1;
-    T init = 2*rec(x);
-    T mult = init;
-    auto value = fms(mult, current, prev);
+    T mult = 2*k/x;
+//    T mult = init;
+    auto value =  mult * current - prev;//fms(mult, current, prev);
     prev = current;
     current = value;
     ++k;
@@ -115,8 +121,8 @@ namespace eve::detail
     }
     while(k < nu)
     {
-      mult = k*init;
-      value = fms(mult, current, prev);
+      mult = 2*k/x;
+      value =  mult * current - prev;; //fms(mult, current, prev);
       prev = current;
       current = value;
       ++k;
@@ -146,7 +152,7 @@ namespace eve::detail
     else EVE_ASSERT(eve::all(is_flint(nu)), "some nu elements are not floating integral values");
     if constexpr(has_native_abi_v<T>)
     {
-
+      std::cout << "krot 1 " << std::endl;
       auto br_small =  [](auto n, auto z)
         {
           auto euler = Ieee_constant<T, 0x3f13c468U, 0x3fe2788cfc6fb619ULL>();
@@ -180,6 +186,8 @@ namespace eve::detail
 
       auto br_large =  [](auto nu, auto x)
         {
+         std::cout << "krot 1 br_large" << std::endl;
+
           auto [j, y] = kernel_asymp_jy(nu, x);
           return y;
         };
@@ -245,7 +253,8 @@ namespace eve::detail
         notdone = next_interval(br_small,  notdone, x <= eps(as(x)), r, nu, x);
         if( eve::any(notdone) )
         {
-          notdone = next_interval(br_large,  notdone, x > T(10000), r, nu, x);
+          std::cout << "br_large yn" << std::endl;
+          notdone = next_interval(br_large,  notdone, x > T(1000), r, nu, x);
           if( eve::any(notdone) )
           {
             notdone = last_interval(br_medium,  notdone, r, nu, x);

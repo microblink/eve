@@ -34,6 +34,8 @@
 #include <eve/function/lgamma.hpp>
 #include <eve/function/log.hpp>
 #include <eve/function/rec.hpp>
+#include <eve/function/sinpicospi.hpp>
+#include <eve/function/sincos.hpp>
 #include <eve/function/sinpic.hpp>
 #include <eve/function/sinhc.hpp>
 #include <eve/function/sqr.hpp>
@@ -53,6 +55,7 @@ namespace eve::detail
     if constexpr(std::is_integral_v<I>) return kernel_jy(T(n), x);
     else
     {
+      std::cout << "kernel_jy n " << n << " x " << x << std::endl;
       T nu(n);
       T jnu, jpnu, nnu, npnu;
       if (x == inf(as(x))) return kumi::make_tuple(T(0), nan(as(x)), T(0), nan(as(x)));
@@ -435,15 +438,18 @@ namespace eve::detail
     auto xltx_min = x < x_min;
     if (eve::all(xltx_min))
     {
+      std::cout << "icitte lt" << std::endl;
       case_lt(x, nmu, npmu, nnu1, jmu);
     }
     else if (eve::none(xltx_min))
     {
+      std::cout << "icitte ge" << std::endl;
       case_ge(x, nmu, npmu, nnu1, jmu);
     }
     else
     {
-      T nmutmp1, npmutmp1, nnu1tmp1, jmutmp1;
+      std::cout << "icitte ltge" << std::endl;
+       T nmutmp1, npmutmp1, nnu1tmp1, jmutmp1;
       T nmutmp2, npmutmp2, nnu1tmp2, jmutmp2;
       T mxx = eve::max(x, x_min);
       T mix = eve::min(x, x_min);
@@ -491,6 +497,7 @@ namespace eve::detail
       nnu = if_else(isltzx, nnu, allbits);
       npnu = if_else(isltzx, npnu, allbits);
     }
+    std::cout <<  "kernel " << x << " " << nu << std::endl;
     return kumi::make_tuple(jnu, jpnu, nnu, npnu);
   }
 
@@ -584,15 +591,11 @@ namespace eve::detail
   /////////////////////////////////////////////////////////////////////////
 
 
-  template<integral_value I, floating_real_value T>
-  auto kernel_asymp_jy(I nu, T x) noexcept
-  {
-    return kernel_asymp_jy(convert(nu, as(element_type_t<T>())), x);
-  }
-
   template <floating_real_value T> auto
   kernel_asymp_jy(T nu, T x) noexcept
   {
+       std::cout << "eve in kernel_asymp_jy " << nu << "  " << x << std::endl;
+
     const T mu   = sqr(2*nu);
     const T mum1  = dec(mu);
     const T mum9  = mu - T(9);
@@ -606,5 +609,75 @@ namespace eve::detail
     const T coef = eve::sqrt(T(2) / (eve::pi(as(x)) * x));
     return kumi::make_tuple( coef * fms(c, p, s * q), coef * fma(s, p, c * q));
   }
+
+
+  template<integral_value I, floating_real_value T>
+  auto kernel_asymp_jy(I nu, T x) noexcept
+  {
+    return kernel_asymp_jy(T(convert(nu, as(element_type_t<T>()))), x);
+  }
+
+
+  template <class T>
+  inline T asymptotic_bessel_amplitude(T v, T x)
+  {
+    // Calculate the amplitude of J(v, x) and Y(v, x) for large
+    // x: see A&S 9.2.28.
+    T s = 1;
+    T mu = 4 * sqr(v);
+    T txq = 2 * x;
+    txq *= txq;
+
+    s += (mu - 1) / (2 * txq);
+    s += 3 * (mu - 1) * (mu - 9) / (txq * txq * 8);
+    s += 15 * (mu - 1) * (mu - 9) * (mu - 25) / (txq * txq * txq * 8 * 6);
+
+    return eve::sqrt(s * 2 / (eve::pi(as(x)) * x));
+  }
+
+  template <class T>
+  T asymptotic_bessel_phase_mx(T v, T x)
+  {
+    //
+    // Calculate the phase of J(v, x) and Y(v, x) for large x.
+    // See A&S 9.2.29.
+    // Note that the result returned is the phase less (x - PI(v/2 + 1/4))
+    // which we'll factor in later when we calculate the sines/cosines of the result:
+    //
+    T mu = 4 * sqr(v);
+    T denom = 4 * x;
+    T denom_mult = denom * denom;
+
+    T s = 0;
+    s += (mu - 1) / (2 * denom);
+    denom *= denom_mult;
+    s += (mu - 1) * (mu - 25) / (6 * denom);
+    denom *= denom_mult;
+    s += (mu - 1) * (mu * mu - 114 * mu + 1073) / (5 * denom);
+    denom *= denom_mult;
+    s += (mu - 1) * (5 * mu * mu * mu - 1535 * mu * mu + 54703 * mu - 375733) / (14 * denom);
+    return s;
+  }
+
+  template <class T>
+  inline T asymptotic_bessel_y_large_x_2(T v, T x)
+  {
+    // See A&S 9.2.19.
+    // Get the phase and amplitude:
+    T ampl = asymptotic_bessel_amplitude(v, x);
+    T phase = asymptotic_bessel_phase_mx(v, x);
+    //
+    // Calculate the sine of the phase, using
+    // sine/cosine addition rules to factor in
+    // the x - PI(v/2 + 1/4) term not added to the
+    // phase when we calculated it.
+    //
+    auto [sx, cx] = sincos(x);
+    auto [si, ci] = sinpicospi(v / 2 + T(0.25));
+    auto [sp, cp] = sincos(phase);
+    T sin_phase = sp * (cx * ci + sx * si) + cp * (sx * ci - cx * si);
+    return sin_phase * ampl;
+  }
+
 
 }
