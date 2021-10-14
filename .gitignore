@@ -43,3 +43,6 @@ Testing/*
 *.vscode/*
 doc/docs/*
 .cache/
+
+# Vim swap files
+*.swp

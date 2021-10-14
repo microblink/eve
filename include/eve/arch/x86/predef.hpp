@@ -59,4 +59,50 @@
 #   endif
 #  endif
 
+#ifdef __EMSCRIPTEN__
+// SSE emulation on emscripten, doesn't support 256 and 512-bit AVX - add some stubs to silence compile errors
+// in x86 headers that expect AVX stuff to exist
+
+// Note: use #define instead of alias beacuse __m128 and friends are not visible yet
+
+#define __m256d __m128d
+#define __m256  __m128
+#define __m256i __m128i
+
+#define __m512d __m128d
+#define __m512  __m128
+#define __m512i __m128i
+
+using __mmask8  = unsigned char;
+using __mmask16 = unsigned short;
+using __mmask32 = unsigned int;
+using __mmask64 = unsigned long;
+
+#define _mm256_movemask_pd _mm_movemask_pd
+#define _mm256_movemask_ps _mm_movemask_ps
+
+#define _mm512_load_si512  _mm_load_si128
+#define _mm512_loadu_si512 _mm_loadu_si128
+
+#define _mm256_load_si256  _mm_load_si128
+#define _mm256_loadu_si256 _mm_loadu_si128
+
+inline auto emptyFunc1Param( auto x )       noexcept { return x; }
+inline auto emptyFunc2Param( auto x, auto ) noexcept { return x; }
+
+#define _mm256_set_m128i       emptyFunc2Param
+#define _mm256_shuffle_epi8    emptyFunc2Param
+#define _mm256_zextsi128_si256 emptyFunc1Param
+#define _mm256_permutevar8x32_epi32 emptyFunc2Param
+
+#define _mm256_set_epi32 _mm_set_epi16
+#define _mm256_set_epi16 _mm_set_epi8
+
+#define _mm256_permute4x64_epi64 emptyFunc2Param
+#define _mm256_permutevar8x32_ps emptyFunc2Param
+
+#define _mm256_castps_pd _mm_castps_pd
+
+#endif
+
 #endif
