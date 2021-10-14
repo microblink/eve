@@ -87,7 +87,7 @@ using __mmask64 = unsigned long;
 #define _mm256_load_si256  _mm_load_si128
 #define _mm256_loadu_si256 _mm_loadu_si128
 
-inline auto emptyFunc1Param( auto x )       noexcept { return x; }
+inline auto emptyFunc1Param( auto x       ) noexcept { return x; }
 inline auto emptyFunc2Param( auto x, auto ) noexcept { return x; }
 
 #define _mm256_set_m128i       emptyFunc2Param
